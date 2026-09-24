@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ArogyaAegis Circuit – SereniSuit v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  body{margin:0}
+  [hidden]{display:none!important}
+  :root{
+    color-scheme: dark;
+    --bg:#111a23; --panel:#16212c; --box:#1c2935; --line:#33465a; --new:#3fb6a8;
+    --ink:#dbe5ef; --muted:#8a9bb0; --faint:#5d6f82;
+    --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+    --sans:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+  .wrap{max-width:1240px;margin:0 auto;padding-inline:16px;padding-block:28px 56px;display:grid;gap:22px}
+  header{display:grid;gap:8px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--new)}
+  h1{font-family:var(--mono);font-weight:700;font-size:clamp(24px,4vw,34px);margin:0;text-wrap:balance}
+  .lead{margin:0;color:var(--muted);max-width:70ch}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-family:var(--mono);font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;color:var(--ink);background:var(--panel)}
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{font-family:var(--mono);font-size:12px;background:transparent;color:var(--muted);border:0;padding:7px 12px;cursor:pointer}
+  .seg button[aria-pressed="true"]{background:var(--box);color:var(--ink)}
+  .seg button:focus-visible{outline:2px solid var(--new);outline-offset:-2px}
+  .hint{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  .canvas{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#131d27;max-height:88vh}
+  .canvas svg{display:block;width:100%;height:auto}
+  .canvas.actual svg{width:2000px;max-width:none}
+  h2{font-family:var(--mono);font-size:18px;margin:8px 0 0}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:640px}
+  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid #243444;vertical-align:top}
+  th{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--panel);position:sticky;top:0}
+  td.g{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .sw{display:inline-block;width:22px;height:0;border-top:3px dashed;vertical-align:middle;margin-right:8px}
+  .tag{font-family:var(--mono);font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+  .tag.new{border-color:var(--new);color:var(--new)}
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+  .note{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .note h3{font-family:var(--mono);font-size:13px;margin:0 0 6px;color:var(--ink)}
+  .note ul{margin:0;padding-left:18px;color:var(--muted)}
+  .note li{margin:3px 0}
+  .hs{fill:transparent;stroke:transparent;stroke-width:3;cursor:help;pointer-events:all;outline:none;transition:fill .12s,stroke .12s}
+  .hs:hover,.hs:focus-visible,.hs.on{fill:rgba(63,182,168,.08);stroke:#3fb6a8}
+  .tip{position:fixed;z-index:20;max-width:340px;width:max-content;background:#0e1822;border:1px solid #3fb6a8;border-radius:14px;padding:12px 14px 13px;box-shadow:0 12px 32px rgba(0,0,0,.45);pointer-events:none;font-size:13px;line-height:1.45;color:var(--ink)}
+  .tip::before{content:"";position:absolute;width:12px;height:12px;background:#0e1822;border-left:1px solid #3fb6a8;border-top:1px solid #3fb6a8;transform:rotate(45deg);left:var(--ax,22px);top:-7px}
+  .tip.below::before{display:block}.tip.above::before{top:auto;bottom:-7px;transform:rotate(225deg)}
+  .tip h4{margin:0;font-family:var(--mono);font-size:15px;color:#fff}
+  .tip .role{margin:1px 0 8px;font-family:var(--mono);font-size:11.5px;color:var(--new);letter-spacing:.03em}
+  .tip dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px}
+  .tip dt{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}
+  .tip dt.i{color:#62d26f}.tip dt.o{color:#f0a35e}.tip dt.u{color:#b392f0}
+  .tip dd{margin:0;color:#c9d5e1}
+  .tip .pins{margin-top:8px;padding-top:7px;border-top:1px solid #243444;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+  @media (max-width:520px){.tip{max-width:calc(100vw - 32px)}}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Arogya Aegis · wiring diagram</div>
+    <h1>SereniSuit v2 Wiring</h1>
+    <p class="lead">Full wiring for the upgraded vest. It keeps your v1 wiring as it is (AD8232 on GPIO5–7, OLED on GPIO8/9, DRV8833 on GPIO4) and adds the new sensors, GPS, SMS modem, SD logging and battery power.</p>
+    <div class="chips">
+      <span class="chip">ESP32-S3 DevKitC-1 N8R8</span>
+      <span class="chip">1 I²C bus · 6 devices</span>
+      <span class="chip">3 UART · 1 SPI</span>
+      <span class="chip">4 power rails</span>
+      <span class="chip">teal outline = new in v2</span>
+    </div>
+  </header>
+
+  <div class="bar">
+    <div class="seg" role="group" aria-label="Zoom">
+      <button id="zfit" type="button" aria-pressed="true">Fit width</button>
+      <button id="zfull" type="button" aria-pressed="false">Actual size</button>
+    </div>
+    <span class="hint">Hover or tap any component to see its inputs, outputs and role</span>
+  </div>
+
+  <div class="canvas" id="canvas"><svg id="dia" viewBox="0 0 2000 2810" role="img" aria-label="SereniSuit v2 wiring diagram"></svg></div>
+
+  <h2>Pin map</h2>
+  <div class="tablewrap"><table id="pins">
+    <thead><tr><th>GPIO</th><th>Signal</th><th>Connects to</th><th>Type</th><th>Status</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+
+  <div class="cols">
+    <div class="note">
+      <h3>Changes from the v1 board</h3>
+      <ul>
+        <li>The power bank is replaced by a Li-Po, BQ24074 charger and TPS63802 feeding the 3V3 pin</li>
+        <li>AD8232 SDN moves from 3V3 to GPIO10, so the ECG is off while charging</li>
+        <li>The DRV8833's second channel (GPIO13) drives a back motor</li>
+        <li>The OLED shares the new I²C bus (0x3C, no address clash)</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>Build notes</h3>
+      <ul>
+        <li>All GND pins join one ground; the AD8232 and GSR join it at a single point near the regulator</li>
+        <li>Combined I²C pull-up should be 2.2 kΩ or higher: remove extra resistors on breakout boards</li>
+        <li>GPIO38 drives the DevKit's RGB LED (board v1.1); it will flicker during SD writes, which does no harm</li>
+        <li>Free pins GPIO2 and GPIO42 can drive a second DRV8833 for 4 haptic zones</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>Pins to avoid</h3>
+      <ul>
+        <li>GPIO3, 45, 46: strapping pins</li>
+        <li>GPIO26–37: flash and octal PSRAM on N8R8</li>
+        <li>ADC2 pins (GPIO11–20) cannot be read while the radio is on, so both analog inputs use ADC1</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+
+<script>
+(function(){
+  const C = {
+    analog:'#62d26f', ctrl:'#b392f0', sda:'#e0914f', scl:'#e6d15a', uart:'#4fc8de',
+    spi:'#f07fb8', pwm:'#6b9cff', ext:'#7fd6c2', v18:'#ffc26b'
+  };
+  const RAIL = {'3V3_D':'#ef6b6b','3V3_A':'#ff9f7a','VSYS':'#f5a524','VBAT':'#d98b3a','5V_PM':'#f06e9a','GND':'#8b97a6','NC':'#5d6f82'};
+  const BOX='#1c2935', LINE='#33465a', NEW='#3fb6a8', INK='#dbe5ef', MUTED='#8a9bb0', PIN='#a9b8c8';
+  const out = [], defs = new Set();
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const mk = c => { const id='a'+c.slice(1); if(!defs.has(c)){defs.add(c);} return id; };
+
+  function box(x,y,w,h,title,sub,isNew,left){
+    out.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" fill="${BOX}" stroke="${isNew?NEW:LINE}" stroke-width="${isNew?2:1.5}"/>`);
+    const tx = left? x+18 : x+w-18, an = left?'start':'end';
+    if(title) out.push(`<text x="${tx}" y="${y+30}" text-anchor="${an}" font-size="20" font-weight="700" fill="${INK}">${esc(title)}</text>`);
+    if(sub) out.push(`<text x="${tx}" y="${y+53}" text-anchor="${an}" font-size="13.5" fill="${MUTED}">${esc(sub)}</text>`);
+  }
+  function pinL(x,y,l){ out.push(`<circle cx="${x}" cy="${y}" r="5.5" fill="${PIN}"/><text x="${x+16}" y="${y+5}" font-size="14" font-weight="600" fill="${INK}">${esc(l)}</text>`); }
+  function pinR(x,y,l){ out.push(`<circle cx="${x}" cy="${y}" r="5.5" fill="${PIN}"/><text x="${x-16}" y="${y+5}" text-anchor="end" font-size="14" font-weight="600" fill="${INK}">${esc(l)}</text>`); }
+  function wire(pts,color,arrow,label,lx,ly,dotted){
+    const d = pts.map(p=>p.join(',')).join(' ');
+    const id = mk(color);
+    let m=''; if(arrow==='end'||arrow==='both') m+=` marker-end="url(#${id})"`; if(arrow==='start'||arrow==='both') m+=` marker-start="url(#${id})"`;
+    out.push(`<polyline points="${d}" fill="none" stroke="${color}" stroke-width="3" stroke-dasharray="${dotted?'3 7':'11 7'}" stroke-linecap="round"${m}/>`);
+    if(label){ out.push(`<text x="${lx}" y="${ly}" text-anchor="middle" font-size="12.5" fill="${MUTED}">${esc(label)}</text>`); }
+  }
+  function flag(x,y,net,dir){
+    const c = RAIL[net], w = 16 + net.length*8.4, s = dir==='right'?1:-1;
+    const x1 = x + s*14, rx = dir==='right'? x1 : x1-w;
+    out.push(`<line x1="${x}" y1="${y}" x2="${x1}" y2="${y}" stroke="${c}" stroke-width="3"/>`);
+    out.push(`<rect x="${rx}" y="${y-11}" width="${w}" height="22" rx="11" fill="#141e28" stroke="${c}" stroke-width="1.6"/>`);
+    out.push(`<text x="${rx+w/2}" y="${y+4.5}" text-anchor="middle" font-size="12" font-weight="700" fill="${c}">${net}</text>`);
+  }
+  function dot(x,y,c){ out.push(`<circle cx="${x}" cy="${y}" r="5" fill="${c}"/>`); }
+  function txt(x,y,s,o={}){ out.push(`<text x="${x}" y="${y}" font-size="${o.size||13}" fill="${o.fill||MUTED}" text-anchor="${o.anchor||'start'}" font-weight="${o.weight||400}">${esc(s)}</text>`); }
+
+  const EX=880, MX=1120, MW=400;
+  // ESP -> module straight link
+  function link(y, espL, modL, color, dir, label){
+    pinR(EX,y,espL); pinL(MX,y,modL);
+    wire([[EX+6,y],[MX-7,y]], color, dir==='in'?'start':'end', label, 925, y-8);
+  }
+
+  // ---------- ESP32-S3 ----------
+  out.push(`<rect x="520" y="-20" width="360" height="2740" rx="16" fill="${BOX}" stroke="${LINE}" stroke-width="1.5"/>`);
+  txt(545,20,'ESP32-S3',{size:24,weight:700,fill:INK});
+  txt(545,44,'DevKitC-1 · N8R8 · v1 board',{size:13.5});
+  txt(700,1180,'TinyML engine',{anchor:'middle',size:18,weight:700,fill:INK});
+  txt(700,1206,'TFLite Micro · ESP-NN',{anchor:'middle'});
+  txt(700,1228,'8 MB PSRAM · BLE 5',{anchor:'middle'});
+  txt(700,1290,'avoid: GPIO3/45/46',{anchor:'middle',fill:'#5d6f82'});
+  txt(700,1310,'avoid: GPIO26–37',{anchor:'middle',fill:'#5d6f82'});
+  txt(700,1350,'spare: GPIO2, GPIO42',{anchor:'middle',fill:'#5d6f82'});
+
+  // ---------- Power column ----------
+  box(20,40,170,130,'Li-Po 1S','3.7 V · 2500 mAh',true,true);
+  txt(38,120,'+ PCM, polyfuse',{size:12});
+  txt(38,138,'reverse-FET',{size:12});
+  box(230,40,170,130,'USB-C','5 V in',true,true);
+  pinR(400,90,'D−'); pinR(400,120,'D+');
+  pinL(520,90,'USB D− · 19'); pinL(520,120,'USB D+ · 20');
+  wire([[406,90],[513,90]],C.ctrl,'both'); wire([[406,120],[513,120]],C.ctrl,'both');
+  out.push(`<circle cx="105" cy="170" r="5.5" fill="${PIN}"/><circle cx="315" cy="170" r="5.5" fill="${PIN}"/>`);
+  txt(115,200,'BAT+',{size:12,fill:INK}); txt(325,200,'VBUS',{size:12,fill:INK});
+  wire([[105,176],[105,233]],RAIL.VBAT,'end'); wire([[315,176],[315,233]],'#ef6b6b','end');
+
+  box(20,240,380,170,'BQ24074','charger + power path',true,true);
+  pinR(400,330,'PGOOD'); pinR(400,380,'SYS');
+  pinL(520,330,'GPIO48'); wire([[406,330],[513,330]],C.ctrl,'end','PGOOD',460,322);
+  flag(400,380,'VSYS','right');
+
+  box(20,460,380,110,'TPS63802','buck-boost → 3.3 V',true,true);
+  pinR(400,500,'VIN'); flag(400,500,'VSYS','right');
+  pinR(400,545,'VOUT'); pinL(520,545,'3V3');
+  wire([[406,545],[513,545]],RAIL['3V3_D'],'end','3V3_D',460,537);
+  pinL(520,600,'GND'); flag(520,600,'GND','left');
+
+  box(20,620,380,100,'Ferrite + LC','600 Ω · 10 µF · 100 nF',true,true);
+  pinR(400,650,'IN'); flag(400,650,'3V3_D','right');
+  pinR(400,695,'OUT'); flag(400,695,'3V3_A','right');
+
+  box(20,750,380,100,'TPS61023','boost → 5 V',true,true);
+  pinR(400,780,'VIN'); flag(400,780,'VSYS','right');
+  pinR(400,825,'VOUT'); flag(400,825,'5V_PM','right');
+
+  // legend panel
+  out.push(`<rect x="20" y="900" width="380" height="620" rx="14" fill="#16212c" stroke="${LINE}" stroke-dasharray="4 5"/>`);
+  txt(40,935,'Wire legend',{size:16,weight:700,fill:INK});
+  [['Analog (ADC1)',C.analog],['Control / interrupt',C.ctrl],['I²C data (SDA)',C.sda],['I²C clock (SCL)',C.scl],['UART',C.uart],['SPI',C.spi],['PWM',C.pwm],['External lead / antenna',C.ext]].forEach((r,i)=>{
+    const y=968+i*30; wire([[40,y],[110,y]],r[1],null); txt(125,y+5,r[0],{size:13.5,fill:INK});
+  });
+  txt(40,1225,'Power rails (net flags)',{size:16,weight:700,fill:INK});
+  [['3V3_D','digital 3.3 V'],['3V3_A','filtered 3.3 V, analog'],['VSYS','3.4–4.2 V system'],['VBAT','battery cell'],['5V_PM','SPS30 only'],['GND','common ground']].forEach((r,i)=>{
+    const y=1258+i*32; flag(40,y,r[0],'right'); txt(150,y+5,r[1],{size:13.5,fill:INK});
+  });
+  txt(40,1470,'Same flag name = same net.',{size:12.5});
+  txt(40,1490,'Teal box outline = new in v2.',{size:12.5,fill:NEW});
+
+  // ---------- A. AD8232 ----------
+  box(MX,40,MW,340,'AD8232','single-lead ECG',false);
+  link(90,'GPIO5 · ADC1','OUTPUT',C.analog,'in','ECG analog');
+  link(140,'GPIO6','LO+',C.ctrl,'in','leads-off +');
+  link(190,'GPIO7','LO−',C.ctrl,'in','leads-off −');
+  link(240,'GPIO10','SDN',C.ctrl,'out','SDN (new)');
+  pinL(MX,290,'3.3V'); flag(MX,290,'3V3_A','left');
+  pinL(MX,340,'GND'); flag(MX,340,'GND','left');
+  pinR(MX+MW,160,'3.5 mm jack');
+  box(1680,40,300,300,'Electrodes','3 textile snap pads',false);
+  out.push(`<rect x="1740" y="120" width="180" height="200" rx="40" fill="#22313f" stroke="${LINE}"/>`);
+  [['RA',1785,170],['LA',1875,170],['RL',1785,270]].forEach(e=>{out.push(`<circle cx="${e[1]}" cy="${e[2]}" r="22" fill="#1a2733" stroke="${C.ext}" stroke-width="2.5"/>`); txt(e[1],e[2]+5,e[0],{anchor:'middle',size:13,weight:700,fill:INK});});
+  wire([[1678,160],[MX+MW+8,160]],C.ext,'end','3-lead',1600,152);
+
+  // ---------- B. GSR ----------
+  box(MX,410,MW,150,'GSR','Grove LM324 front end',false);
+  link(445,'GPIO1 · ADC1','SIG',C.analog,'in','GSR analog');
+  pinL(MX,490,'VCC'); flag(MX,490,'3V3_A','left');
+  pinL(MX,530,'GND'); flag(MX,530,'GND','left');
+  pinR(MX+MW,500,'pads');
+  box(1680,420,300,130,'GSR pads','finger strap / axilla',false);
+  out.push(`<circle cx="1745" cy="505" r="16" fill="#1a2733" stroke="${C.ext}" stroke-width="2.5"/><circle cx="1795" cy="505" r="16" fill="#1a2733" stroke="${C.ext}" stroke-width="2.5"/>`);
+  wire([[1678,500],[MX+MW+8,500]],C.ext,'end','2-lead',1600,492);
+
+  // ---------- C. I2C devices ----------
+  const I2C = [
+    {t:'MAX30102',s:'PPG + SpO₂ · 0x57',n:true,int:['GPIO11','INT','PPG INT']},
+    {t:'MAX30205',s:'skin temp · 0x48',n:true},
+    {t:'LSM6DSOX',s:'IMU + fall ML core · 0x6A',n:true,int:['GPIO12','INT1','IMU INT1']},
+    {t:'SHT40',s:'ambient T / RH · 0x44',n:true},
+    {t:'MAX17048',s:'fuel gauge · 0x36',n:true,cell:true},
+    {t:'SSD1306 OLED',s:'0.96″ · 0x3C · v1 part',n:false,oled:true},
+  ];
+  const TX_SDA=975, TX_SCL=1000;
+  let lastSDA=0,lastSCL=0;
+  I2C.forEach((d,i)=>{
+    const y0=600+i*145, ys=y0+28, yc=y0+52;
+    box(MX,y0,MW,130,d.t,d.s,d.n);
+    pinL(MX,ys,'SDA'); pinL(MX,yc,'SCL');
+    if(i===0){
+      pinR(EX,ys,'GPIO8 · SDA'); pinR(EX,yc,'GPIO9 · SCL');
+      wire([[EX+6,ys],[MX-7,ys]],C.sda,'both','I²C bus',925,ys-8);
+      wire([[EX+6,yc],[MX-7,yc]],C.scl,'end');
+    } else {
+      wire([[TX_SDA,ys],[MX-7,ys]],C.sda,'end');
+      wire([[TX_SCL,yc],[MX-7,yc]],C.scl,'end');
+    }
+    dot(TX_SDA,ys,C.sda); dot(TX_SCL,yc,C.scl);
+    lastSDA=ys; lastSCL=yc;
+    if(d.int){ link(y0+76,d.int[0],d.int[1],C.ctrl,'in',d.int[2]); }
+    if(d.cell){ pinL(MX,y0+76,'CELL'); flag(MX,y0+76,'VBAT','left'); }
+    pinL(MX,y0+100,'VCC'); flag(MX,y0+100,'3V3_D','left');
+    pinL(MX,y0+120,'GND'); flag(MX,y0+120,'GND','left');
+    if(d.oled){
+      out.push(`<rect x="1330" y="${y0+64}" width="172" height="56" rx="6" fill="#05090d" stroke="#2b3a49"/>`);
+      txt(1416,y0+87,'HEAT RISK · LOW',{anchor:'middle',size:13,weight:700,fill:'#8fd3ff'});
+      txt(1416,y0+108,'36.9°C  SpO₂ 97%',{anchor:'middle',size:12,fill:'#7fe0c3'});
+    }
+  });
+  out.push(`<line x1="${TX_SDA}" y1="628" x2="${TX_SDA}" y2="${lastSDA}" stroke="${C.sda}" stroke-width="3" stroke-dasharray="11 7"/>`);
+  out.push(`<line x1="${TX_SCL}" y1="652" x2="${TX_SCL}" y2="${lastSCL}" stroke="${C.scl}" stroke-width="3" stroke-dasharray="11 7"/>`);
+  txt(900,1478,'4.7 kΩ pull-ups → 3V3_D · 400 kHz',{size:12.5});
+
+  // ---------- D. SPS30 ----------
+  box(MX,1490,MW,170,'SPS30','PM1 / PM2.5 / PM10',true);
+  link(1525,'GPIO17 · TX1','RX',C.uart,'out','UART1 TX');
+  link(1555,'GPIO18 · RX1','TX',C.uart,'in','UART1 RX');
+  pinL(MX,1585,'SEL'); flag(MX,1585,'NC','left');
+  pinL(MX,1615,'VDD'); flag(MX,1615,'5V_PM','left');
+  pinL(MX,1645,'GND'); flag(MX,1645,'GND','left');
+  txt(1545,1560,'outer shoulder, open airflow',{size:13});
+  txt(1545,1580,'SEL floating = UART mode',{size:13});
+
+  // ---------- E. GPS ----------
+  box(MX,1690,MW,150,'L76K GPS','GPS · BDS · GLONASS · 9600 baud',true);
+  link(1725,'GPIO15 · TX2','RXD',C.uart,'out','UART2 TX');
+  link(1755,'GPIO16 · RX2','TXD',C.uart,'in','UART2 RX');
+  pinL(MX,1785,'VCC'); flag(MX,1785,'3V3_D','left');
+  pinL(MX,1815,'GND'); flag(MX,1815,'GND','left');
+  pinR(MX+MW,1790,'ANT');
+  box(1680,1745,260,90,'Patch antenna','25 mm · top of shoulder',true);
+  wire([[MX+MW+6,1790],[1673,1790]],C.ext,'end');
+
+  // ---------- F. Modem ----------
+  box(MX,1870,170,130,'','',true);
+  txt(MX+85,1896,'TXS0104E',{anchor:'middle',size:15,weight:700,fill:INK});
+  link(1920,'GPIO43 · TX0','B1',C.uart,'out','UART0 TX');
+  link(1950,'GPIO44 · RX0','B2',C.uart,'in','UART0 RX');
+  pinL(MX,1980,'VCCB'); flag(MX,1980,'3V3_D','left');
+  pinR(MX+170,1920,'A1'); pinR(MX+170,1950,'A2'); pinR(MX+170,1980,'VCCA');
+  box(1360,1870,240,240,'A7670','LTE SMS · optional',true);
+  pinL(1360,1920,'RXD'); pinL(1360,1950,'TXD'); pinL(1360,1980,'VDD_EXT');
+  wire([[MX+176,1920],[1353,1920]],C.uart,'end');
+  wire([[1353,1950],[MX+177,1950]],C.uart,'end');
+  wire([[1353,1980],[MX+177,1980]],C.v18,'end');
+  txt(1325,2002,'1.8 V',{anchor:'middle',size:11.5,fill:C.v18});
+  pinR(EX,2035,'GPIO47'); pinL(1360,2035,'PWRKEY');
+  wire([[EX+6,2035],[1353,2035]],C.ctrl,'end','PWRKEY · NPN',925,2027);
+  pinL(1360,2065,'VBAT'); flag(1360,2065,'VSYS','left');
+  pinL(1360,2092,'GND'); flag(1360,2092,'GND','left');
+  pinR(1600,1935,'ANT'); pinR(1600,2040,'SIM');
+  box(1680,1895,260,80,'LTE antenna','u.FL · keep-out',true);
+  wire([[1606,1935],[1673,1935]],C.ext,'end');
+  box(1680,2000,260,80,'Nano-SIM','+ SMF05C ESD',true);
+  wire([[1606,2040],[1673,2040]],C.ext,'both');
+
+
+  // ---------- G. microSD ----------
+  box(MX,2130,MW,190,'microSD','SPI · encrypted logs',true);
+  link(2160,'GPIO38','CS',C.spi,'out','SPI CS');
+  link(2190,'GPIO39','SCK',C.spi,'out','SPI SCK');
+  link(2220,'GPIO40','MOSI',C.spi,'out','SPI MOSI');
+  link(2250,'GPIO41','MISO',C.spi,'in','SPI MISO');
+  pinL(MX,2280,'VDD'); flag(MX,2280,'3V3_D','left');
+  pinL(MX,2305,'GND'); flag(MX,2305,'GND','left');
+
+  // ---------- H. DRV8833 ----------
+  box(MX,2350,MW,200,'DRV8833','2-ch motor driver · v1 part',false);
+  link(2385,'GPIO4 · PWM','AIN1',C.pwm,'out','PWM A 20 kHz');
+  link(2415,'GPIO13 · PWM','BIN1',C.pwm,'out','PWM B (new)');
+  pinL(MX,2445,'AIN2 · BIN2'); flag(MX,2445,'GND','left');
+  pinL(MX,2475,'nSLEEP'); flag(MX,2475,'3V3_D','left');
+  pinL(MX,2505,'VM'); flag(MX,2505,'VSYS','left');
+  pinL(MX,2535,'GND'); flag(MX,2535,'GND','left');
+  txt(MX+MW-18,2535,'C1 10 µF on VM',{anchor:'end',size:12.5});
+  pinR(MX+MW,2420,'AOUT1/2'); pinR(MX+MW,2490,'BOUT1/2');
+  [[2410,'Motor A · chest',false],[2500,'Motor B · back',true]].forEach(m=>{
+    out.push(`<circle cx="1740" cy="${m[0]}" r="40" fill="#1a2733" stroke="${m[2]?NEW:LINE}" stroke-width="2"/>`);
+    txt(1740,m[0]+8,'M',{anchor:'middle',size:24,weight:700,fill:INK});
+    txt(1795,m[0]+5,m[1],{size:13.5});
+  });
+  wire([[MX+MW+6,2420],[1600,2420],[1692,2410]],C.pwm,'end');
+  wire([[MX+MW+6,2490],[1600,2490],[1692,2500]],C.pwm,'end');
+
+  // ---------- I. Buzzer ----------
+  box(MX,2580,MW,120,'Piezo buzzer','S8050 NPN · 2.7 kHz',true);
+  link(2615,'GPIO21','IN',C.pwm,'out','buzzer PWM');
+  pinL(MX,2645,'VCC'); flag(MX,2645,'3V3_D','left');
+  pinL(MX,2675,'GND'); flag(MX,2675,'GND','left');
+
+  // ---------- Buttons + app (left) ----------
+  box(20,2300,380,90,'SOS button','hold 3 s · to GND',true,true);
+  pinR(400,2345,'SW'); pinL(520,2345,'GPIO14');
+  wire([[406,2345],[513,2345]],C.ctrl,'end','SOS',460,2337);
+  box(20,2410,380,90,'ACK button','cancel alarm · BOOT',true,true);
+  pinR(400,2455,'SW'); pinL(520,2455,'GPIO0');
+  wire([[406,2455],[513,2455]],C.ctrl,'end','ACK',460,2447);
+  box(20,2540,380,160,'Companion app','phone dashboard',true,true);
+  out.push(`<rect x="45" y="2605" width="110" height="70" rx="6" fill="#0e151c" stroke="${LINE}"/><rect x="175" y="2600" width="44" height="80" rx="8" fill="#0e151c" stroke="${LINE}"/>`);
+  txt(250,2630,'IMD / CPCB cache',{size:12});
+  txt(250,2650,'SMS via phone',{size:12});
+  wire([[513,2590],[406,2590]],C.uart,'end','BLE 5',460,2582,true);
+  wire([[406,2630],[513,2630]],C.uart,'end',null,0,0,true);
+  pinL(520,2610,'BLE radio');
+
+  // ---------- component info (hover / tap) ----------
+  const INFO = {
+    esp:{t:'ESP32-S3 (DevKitC-1 N8R8)',r:'Main controller · TinyML engine',i:'ECG and GSR (analog), 6 I²C sensors, SPS30 + GPS (UART), buttons, charger status, BLE commands from the app',o:'PWM to motors and buzzer, OLED screen, SD logs, BLE alerts to the app, SMS commands to the modem',u:'Runs all health AI on the vest: filters signals, learns the wearer\'s baseline, scores heat / hydration / breathing / heart / fall risk and decides alert level or SOS. Raw data never leaves it.',p:'Dual-core 240 MHz · 8 MB PSRAM · Wi-Fi + BLE 5'},
+    lipo:{t:'Li-Po battery 1S',r:'Energy source',i:'Charge current from the BQ24074',o:'VBAT 3.0–4.2 V to the charger / power path',u:'Powers the vest for about 26 h (≈45 h with light sleep, estimated) so it keeps working during power cuts in floods or cyclones.',p:'3.7 V · 2500 mAh · protection circuit + polyfuse'},
+    usbc:{t:'USB-C port',r:'Charging + programming',i:'5 V from any phone charger or power bank; USB data from a laptop',o:'VBUS to the charger; D+/D− to the ESP32 (GPIO19/20)',u:'Charges the vest and lets you flash new firmware and models.',p:'5.1 kΩ CC resistors · USBLC6 ESD protection'},
+    bq:{t:'BQ24074 charger',r:'Charger + power path',i:'5 V VBUS from USB-C, battery voltage',o:'VSYS 3.4–4.2 V system rail; PGOOD signal to GPIO48',u:'Charges the Li-Po while the vest keeps running. PGOOD tells the ESP32 a charger is plugged in so it switches the ECG off (electrode safety).',p:'PGOOD → GPIO48'},
+    tps63:{t:'TPS63802 buck-boost',r:'Main 3.3 V regulator',i:'VSYS 3.0–4.2 V',o:'Stable 3V3_D rail (up to 2 A)',u:'Gives a steady 3.3 V from a full or nearly empty battery, so readings stay accurate all day.',p:'3V3_D → ESP32 3V3 pin and all digital sensors'},
+    ferrite:{t:'Ferrite + LC filter',r:'Clean analog supply',i:'3V3_D digital rail (noisy)',o:'3V3_A filtered rail',u:'Removes switching noise so the ECG and GSR signals are clean enough for heart-rhythm and sweat analysis.',p:'600 Ω @100 MHz bead · 10 µF · 100 nF'},
+    tps61:{t:'TPS61023 boost',r:'5 V supply',i:'VSYS',o:'5V_PM rail',u:'The SPS30 air-quality sensor needs 5 V; this makes it from the single-cell battery.',p:'Feeds SPS30 only'},
+    ad8232:{t:'AD8232 ECG front end',r:'Heart signal amplifier',i:'Tiny heart voltages from 3 chest electrodes (RA, LA, RL); SDN control from GPIO10',o:'Analog ECG waveform to GPIO5 (ADC1); leads-off flags LO+/LO− to GPIO6/7',u:'Heart rate, HRV and heart rhythm. The 1D-CNN flags atrial fibrillation or irregular beats; ECG also gives breathing rate.',p:'OUTPUT→GPIO5 · LO+→GPIO6 · LO−→GPIO7 · SDN←GPIO10 · 3V3_A'},
+    electrodes:{t:'Chest electrodes',r:'Skin contact sensors',i:'Electrical activity of the heart through the skin',o:'Raw ECG signal to the AD8232 via 3.5 mm jack',u:'Textile snap pads built into the vest so ECG works while the wearer moves or works outdoors.',p:'RA · LA · RL (right-leg drive)'},
+    gsr:{t:'GSR / EDA sensor',r:'Sweat response front end',i:'Skin conductance from 2 pads',o:'Analog signal to GPIO1 (ADC1)',u:'Tracks sweating: rising sweat with rising heart rate signals heat strain; a falling trend in heat can signal dehydration. Also drives the original SereniSuit stress model.',p:'SIG→GPIO1 · 3V3_A'},
+    gsrpads:{t:'GSR pads',r:'Skin contact',i:'Skin conductance at finger or armpit',o:'Signal to the GSR board',u:'Placed where sweat glands are dense for a strong reading.',p:'2 electrodes'},
+    max30102:{t:'MAX30102 PPG',r:'Pulse + blood oxygen',i:'Red and infrared light reflected from the skin',o:'HR and SpO₂ samples over I²C; data-ready interrupt to GPIO11',u:'Blood-oxygen drops warn of breathing trouble (smoke, pollution, illness); SpO₂ below 90% can trigger SOS. Backs up ECG heart rate.',p:'I²C 0x57 · INT→GPIO11 · 3V3_D'},
+    max30205:{t:'MAX30205 skin temperature',r:'Body heat sensor (±0.1 °C)',i:'Skin temperature at the armpit',o:'Temperature over I²C',u:'Core-temperature proxy for heat stress and fever. With heart rate it feeds the Physiological Strain Index behind heat alerts.',p:'I²C 0x48 · 3V3_D'},
+    lsm:{t:'LSM6DSOX IMU',r:'Motion + fall sensor',i:'Acceleration and rotation of the chest',o:'Motion data over I²C; fall / impact interrupt to GPIO12',u:'Detects falls (runs a decision tree on its own ML core), activity level for fatigue, and breathing rate from chest movement.',p:'I²C 0x6A · INT1→GPIO12 · 3V3_D'},
+    sht40:{t:'SHT40 ambient sensor',r:'Air temperature + humidity',i:'Outside air (shoulder vent)',o:'Temperature and humidity over I²C',u:'Computes heat index / wet-bulb temperature, so the heat alert considers the environment, not only the body.',p:'I²C 0x44 · 3V3_D'},
+    max17048:{t:'MAX17048 fuel gauge',r:'Battery monitor',i:'Battery cell voltage (VBAT)',o:'Battery % over I²C',u:'Warns before the battery dies and lets the firmware save power, so SOS is never lost to a flat battery.',p:'I²C 0x36 · CELL←VBAT'},
+    oled:{t:'SSD1306 OLED (v1 part)',r:'On-vest display',i:'Text and graphics over I²C',o:'Visible status on the 0.96″ screen',u:'Shows risk level, temperature, SpO₂ and battery at a glance, with no phone needed.',p:'I²C 0x3C · 3V3_D'},
+    sps30:{t:'Sensirion SPS30',r:'Particulate matter sensor',i:'Outside air drawn through its fan',o:'PM1 / PM2.5 / PM10 values over UART to GPIO18',u:'Measures smoke and smog exposure; combined with SpO₂ and breathing rate it gives the respiratory-risk alert.',p:'RX←GPIO17 · TX→GPIO18 · 5V_PM · SEL open = UART'},
+    gps:{t:'Quectel L76K GNSS',r:'Location',i:'Satellite signals (GPS, BeiDou, GLONASS, QZSS) from the patch antenna',o:'Position (NMEA) over UART to GPIO16',u:'Adds the wearer\'s location to an SOS message; used only during emergencies and with consent.',p:'RXD←GPIO15 · TXD→GPIO16 · 3V3_D'},
+    patch:{t:'GNSS patch antenna',r:'Satellite antenna',i:'Satellite radio signals',o:'RF signal to the L76K',u:'Mounted on the shoulder with a clear view of the sky for a fast fix.',p:'25 mm ceramic patch'},
+    txs:{t:'TXS0104E level shifter',r:'3.3 V ↔ 1.8 V translator',i:'3.3 V UART from ESP32 (B side), 1.8 V UART from modem (A side)',o:'The same signals at the other voltage',u:'The A7670 modem talks at 1.8 V; this protects it and lets the ESP32 send SMS commands.',p:'B1←GPIO43 · B2→GPIO44 · VCCA = modem 1.8 V'},
+    a7670:{t:'SIMCom A7670 LTE (optional)',r:'Cellular SMS modem',i:'AT commands from the ESP32; power-key pulse on GPIO47; mobile network via antenna + SIM',o:'SMS to caregivers / ASHA workers; status replies to the ESP32',u:'Sends SOS with GPS location even when the phone is not nearby. SMS works without mobile data, which suits disasters.',p:'UART0 via level shifter · PWRKEY←GPIO47 · VBAT from VSYS'},
+    lteant:{t:'LTE antenna',r:'Cellular antenna',i:'RF from the modem',o:'Radio link to the mobile tower',u:'Carries SOS messages; needs a copper keep-out on the PCB.',p:'u.FL connector'},
+    sim:{t:'Nano-SIM holder',r:'Network identity',i:'SIM card',o:'Network access for the modem',u:'Any Indian SIM with SMS enabled.',p:'SMF05C ESD protection'},
+    sd:{t:'microSD card',r:'Offline storage',i:'Data over SPI from the ESP32',o:'Stored readings back to the ESP32',u:'Keeps encrypted history for the personal baseline model and daily summaries when there is no phone or internet.',p:'CS←GPIO38 · SCK←39 · MOSI←40 · MISO→41 · 3V3_D'},
+    drv:{t:'DRV8833 motor driver (v1 part)',r:'Haptic driver',i:'PWM from GPIO4 (motor A) and GPIO13 (motor B)',o:'Motor current from VSYS to 2 vibration motors',u:'Turns alerts into vibration patterns so warnings are felt, even on noisy worksites or by users with hearing loss.',p:'AIN1←GPIO4 · BIN1←GPIO13 · VM = VSYS · C1 10 µF'},
+    motorA:{t:'Vibration motor A (chest)',r:'Haptic output',i:'Drive current from DRV8833 AOUT',o:'Vibration on the chest',u:'Silent alert zone 1; also delivers the SereniSuit breathing biofeedback.',p:'3 V ERM coin motor'},
+    motorB:{t:'Vibration motor B (back)',r:'Haptic output',i:'Drive current from DRV8833 BOUT',o:'Vibration on the back',u:'Silent alert zone 2; different patterns mean different risks (heat vs. breathing vs. SOS countdown).',p:'3 V ERM coin motor'},
+    buzzer:{t:'Piezo buzzer',r:'Audible alarm',i:'2.7 kHz PWM from GPIO21 via S8050 transistor',o:'Loud beep',u:'Calls for help from people nearby during SOS or a fall, when the wearer may not respond.',p:'GPIO21 → 1 kΩ → S8050'},
+    sos:{t:'SOS button',r:'Manual emergency',i:'Wearer\'s press (hold 3 s)',o:'Low signal on GPIO14',u:'Lets the wearer call for help at any time; starts the SMS + GPS alert.',p:'GPIO14 · internal pull-up'},
+    ack:{t:'ACK button',r:'Cancel / confirm',i:'Wearer\'s press',o:'Low signal on GPIO0',u:'Cancels a false alarm during the 30-s countdown and confirms the wearer is okay; reduces false SOS.',p:'GPIO0 (BOOT button)'},
+    app:{t:'Companion app',r:'Phone dashboard',i:'BLE alerts and summaries from the vest; IMD heat and CPCB air-quality feeds when online',o:'Settings, SOS contacts and cached warnings back to the vest',u:'Daily summaries, trends and risk scores in regional languages; can also send SMS through the phone.',p:'BLE 5 · works offline with cached alerts'}
+  };
+  const HS = [
+    ['esp',520,-20,360,2740],['lipo',20,40,170,130],['usbc',230,40,170,130],['bq',20,240,380,170],['tps63',20,460,380,110],['ferrite',20,620,380,100],['tps61',20,750,380,100],
+    ['ad8232',MX,40,MW,340],['electrodes',1680,40,300,300],['gsr',MX,410,MW,150],['gsrpads',1680,420,300,130],
+    ['max30102',MX,600,MW,130],['max30205',MX,745,MW,130],['lsm',MX,890,MW,130],['sht40',MX,1035,MW,130],['max17048',MX,1180,MW,130],['oled',MX,1325,MW,130],
+    ['sps30',MX,1490,MW,170],['gps',MX,1690,MW,150],['patch',1680,1745,260,90],['txs',MX,1870,170,130],['a7670',1360,1870,240,240],['lteant',1680,1895,260,80],['sim',1680,2000,260,80],
+    ['sd',MX,2130,MW,190],['drv',MX,2350,MW,200],['motorA',1700,2370,80,80],['motorB',1700,2460,80,80],['buzzer',MX,2580,MW,120],
+    ['sos',20,2300,380,90],['ack',20,2410,380,90],['app',20,2540,380,160]
+  ];
+  HS.forEach(([k,x,y,w,h])=>{ out.push(`<rect class="hs" data-k="${k}" x="${x}" y="${y}" width="${w}" height="${h}" rx="${k.startsWith('motor')?40:14}" tabindex="0" role="button" aria-label="${esc(INFO[k].t)} details"/>`); });
+
+  // ---------- defs ----------
+  let d='';
+  defs.forEach(c=>{ d+=`<marker id="a${c.slice(1)}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="16" markerHeight="16" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${c}"/></marker>`; });
+  const grid = `<pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="#243242"/></pattern>`;
+  document.getElementById('dia').innerHTML =
+    `<defs>${grid}${d}</defs><rect width="2000" height="2810" fill="#131d27"/><rect width="2000" height="2810" fill="url(#dots)"/>`+
+    `<g transform="translate(0,60)" font-family="JetBrains Mono, ui-monospace, Menlo, monospace">${out.join('')}</g>`;
+
+  // ---------- pin table ----------
+  const P = [
+    ['0','BTN_ACK','Acknowledge button (BOOT)','Control','v1 board'],
+    ['1','GSR_OUT','GSR SIG','Analog · ADC1','New'],
+    ['4','HAP_A','DRV8833 AIN1','PWM','v1'],
+    ['5','ECG_OUT','AD8232 OUTPUT','Analog · ADC1','v1'],
+    ['6','ECG_LO+','AD8232 LO+','Input','v1'],
+    ['7','ECG_LO−','AD8232 LO−','Input','v1'],
+    ['8','I2C_SDA','MAX30102, MAX30205, LSM6DSOX, SHT40, MAX17048, OLED','I²C','v1'],
+    ['9','I2C_SCL','Same 6 devices','I²C','v1'],
+    ['10','ECG_SDN','AD8232 SDN (was tied to 3V3)','Control','New'],
+    ['11','PPG_INT','MAX30102 INT','Interrupt','New'],
+    ['12','IMU_INT1','LSM6DSOX INT1','Interrupt','New'],
+    ['13','HAP_B','DRV8833 BIN1','PWM','New'],
+    ['14','BTN_SOS','SOS button','Control','New'],
+    ['15','GPS_TX','L76K RXD','UART2','New'],
+    ['16','GPS_RX','L76K TXD','UART2','New'],
+    ['17','PM_TX','SPS30 RX','UART1','New'],
+    ['18','PM_RX','SPS30 TX','UART1','New'],
+    ['19 / 20','USB D− / D+','USB-C','Native USB','New'],
+    ['21','BUZZER','S8050 base (1 kΩ)','PWM','New'],
+    ['38–41','SD_CS / SCK / MOSI / MISO','microSD','SPI','New'],
+    ['43','MODEM_TX','TXS0104E B1 → A7670 RXD','UART0','New'],
+    ['44','MODEM_RX','TXS0104E B2 ← A7670 TXD','UART0','New'],
+    ['47','MODEM_PWRKEY','NPN → A7670 PWRKEY','Control','New'],
+    ['48','CHG_PGOOD','BQ24074 PGOOD','Input','New'],
+  ];
+  const col = t => t.startsWith('Analog')?C.analog:t.startsWith('I²C')?C.sda:t.startsWith('UART')?C.uart:t==='SPI'?C.spi:t==='PWM'?C.pwm:t==='Native USB'?C.ctrl:C.ctrl;
+  document.querySelector('#pins tbody').innerHTML = P.map(r=>`<tr><td class="g">${r[0]}</td><td class="g">${esc(r[1])}</td><td>${esc(r[2])}</td><td><span class="sw" style="border-color:${col(r[3])}"></span>${esc(r[3])}</td><td><span class="tag${r[4]==='New'?' new':''}">${r[4]}</span></td></tr>`).join('');
+
+  // ---------- tooltip behaviour ----------
+  const tip=document.getElementById('tip'); let cur=null, pinned=false;
+  function fill(k){ const d=INFO[k]; tip.innerHTML=`<h4>${esc(d.t)}</h4><div class="role">${esc(d.r)}</div><dl><dt class="i">In</dt><dd>${esc(d.i)}</dd><dt class="o">Out</dt><dd>${esc(d.o)}</dd><dt class="u">Use</dt><dd>${esc(d.u)}</dd></dl><div class="pins">${esc(d.p)}</div>`; }
+  function place(x,y){
+    tip.hidden=false; const r=tip.getBoundingClientRect(), vw=innerWidth, vh=innerHeight, m=12;
+    let left=Math.min(Math.max(m,x-26), vw-r.width-m), top=y+22, below=true;
+    if(top+r.height>vh-m){ top=y-r.height-22; below=false; }
+    if(top<m) top=m;
+    tip.style.left=left+'px'; tip.style.top=top+'px';
+    tip.classList.toggle('above',!below); tip.style.setProperty('--ax',Math.min(Math.max(14,x-left-6),r.width-26)+'px');
+  }
+  function show(el,x,y){ if(cur&&cur!==el) cur.classList.remove('on'); cur=el; el.classList.add('on'); fill(el.dataset.k); place(x,y); }
+  function hide(){ tip.hidden=true; if(cur) cur.classList.remove('on'); cur=null; pinned=false; }
+  const svg=document.getElementById('dia');
+  svg.addEventListener('pointermove',e=>{ if(pinned||e.pointerType==='touch') return; const el=e.target.closest('.hs'); if(el) show(el,e.clientX,e.clientY); else if(cur) hide(); });
+  svg.addEventListener('pointerleave',e=>{ if(!pinned) hide(); });
+  svg.addEventListener('click',e=>{ const el=e.target.closest('.hs'); if(!el){ hide(); return; } if(pinned&&cur===el){ hide(); return; } show(el,e.clientX,e.clientY); pinned=true; });
+  svg.addEventListener('focusin',e=>{ const el=e.target.closest('.hs'); if(!el) return; const b=el.getBoundingClientRect(); show(el,b.left+Math.min(b.width/2,160),b.top+Math.min(b.height/2,40)); });
+  svg.addEventListener('focusout',()=>{ if(!pinned) hide(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') hide(); });
+  document.addEventListener('click',e=>{ if(!e.target.closest('#dia')) hide(); });
+  document.getElementById('canvas').addEventListener('scroll',()=>{ if(cur) hide(); },{passive:true});
+
+  // ---------- zoom ----------
+  const cv=document.getElementById('canvas'), bf=document.getElementById('zfit'), bz=document.getElementById('zfull');
+  function set(full){ cv.classList.toggle('actual',full); bf.setAttribute('aria-pressed',String(!full)); bz.setAttribute('aria-pressed',String(full)); try{localStorage.setItem('ssz',full?'1':'0')}catch(e){} }
+  bf.onclick=()=>set(false); bz.onclick=()=>set(true);
+  try{ if(localStorage.getItem('ssz')==='1') set(true); }catch(e){}
+})();
+</script>
+
+</body>
+</html>
