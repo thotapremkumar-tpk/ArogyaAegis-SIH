@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ArogyaAegis Circuit – SereniSuit v2</title>
+<title>ArogyaAegis v2 Circuit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
@@ -68,7 +68,7 @@
 <div class="wrap">
   <header>
     <div class="eyebrow">Arogya Aegis · wiring diagram</div>
-    <h1>SereniSuit v2 Wiring</h1>
+    <h1>ArogyaAegis v2 Wiring</h1>
     <p class="lead">Full wiring for the upgraded vest. It keeps your v1 wiring as it is (AD8232 on GPIO5–7, OLED on GPIO8/9, DRV8833 on GPIO4) and adds the new sensors, GPS, SMS modem, SD logging and battery power.</p>
     <div class="chips">
       <span class="chip">ESP32-S3 DevKitC-1 N8R8</span>
@@ -87,11 +87,12 @@
     <span class="hint">Hover or tap any component to see its inputs, outputs and role</span>
   </div>
 
-  <div class="canvas" id="canvas"><svg id="dia" viewBox="0 0 2000 2810" role="img" aria-label="SereniSuit v2 wiring diagram"></svg></div>
+  <div class="canvas" id="canvas"><svg id="dia" viewBox="0 0 2000 2810" role="img" aria-label="ArogyaAegis v2 wiring diagram"></svg></div>
 
   <h2>Pin map</h2>
+  <p class="hint" style="margin:0">Phase = when the pin gets wired: 1 = built · 2 = multi-sensor stress + biofeedback · 3 = heat, air and SOS layer. <a href="https://github.com/thotapremkumar-tpk/ArogyaAegis-SIH#roadmap--three-phases" style="color:var(--new)">Roadmap →</a></p>
   <div class="tablewrap"><table id="pins">
-    <thead><tr><th>GPIO</th><th>Signal</th><th>Connects to</th><th>Type</th><th>Status</th></tr></thead>
+    <thead><tr><th>GPIO</th><th>Signal</th><th>Connects to</th><th>Type</th><th>Status</th><th>Phase</th></tr></thead>
     <tbody></tbody>
   </table></div>
 
@@ -391,7 +392,7 @@
     tps61:{t:'TPS61023 boost',r:'5 V supply',i:'VSYS',o:'5V_PM rail',u:'The SPS30 air-quality sensor needs 5 V; this makes it from the single-cell battery.',p:'Feeds SPS30 only'},
     ad8232:{t:'AD8232 ECG front end',r:'Heart signal amplifier',i:'Tiny heart voltages from 3 chest electrodes (RA, LA, RL); SDN control from GPIO10',o:'Analog ECG waveform to GPIO5 (ADC1); leads-off flags LO+/LO− to GPIO6/7',u:'Heart rate, HRV and heart rhythm. The 1D-CNN flags atrial fibrillation or irregular beats; ECG also gives breathing rate.',p:'OUTPUT→GPIO5 · LO+→GPIO6 · LO−→GPIO7 · SDN←GPIO10 · 3V3_A'},
     electrodes:{t:'Chest electrodes',r:'Skin contact sensors',i:'Electrical activity of the heart through the skin',o:'Raw ECG signal to the AD8232 via 3.5 mm jack',u:'Textile snap pads built into the vest so ECG works while the wearer moves or works outdoors.',p:'RA · LA · RL (right-leg drive)'},
-    gsr:{t:'GSR / EDA sensor',r:'Sweat response front end',i:'Skin conductance from 2 pads',o:'Analog signal to GPIO1 (ADC1)',u:'Tracks sweating: rising sweat with rising heart rate signals heat strain; a falling trend in heat can signal dehydration. Also drives the original SereniSuit stress model.',p:'SIG→GPIO1 · 3V3_A'},
+    gsr:{t:'GSR / EDA sensor',r:'Sweat response front end',i:'Skin conductance from 2 pads',o:'Analog signal to GPIO1 (ADC1)',u:'Tracks sweating: rising sweat with rising heart rate signals heat strain; a falling trend in heat can signal dehydration. Also drives the stress model.',p:'SIG→GPIO1 · 3V3_A'},
     gsrpads:{t:'GSR pads',r:'Skin contact',i:'Skin conductance at finger or armpit',o:'Signal to the GSR board',u:'Placed where sweat glands are dense for a strong reading.',p:'2 electrodes'},
     max30102:{t:'MAX30102 PPG',r:'Pulse + blood oxygen',i:'Red and infrared light reflected from the skin',o:'HR and SpO₂ samples over I²C; data-ready interrupt to GPIO11',u:'Blood-oxygen drops warn of breathing trouble (smoke, pollution, illness); SpO₂ below 90% can trigger SOS. Backs up ECG heart rate.',p:'I²C 0x57 · INT→GPIO11 · 3V3_D'},
     max30205:{t:'MAX30205 skin temperature',r:'Body heat sensor (±0.1 °C)',i:'Skin temperature at the armpit',o:'Temperature over I²C',u:'Core-temperature proxy for heat stress and fever. With heart rate it feeds the Physiological Strain Index behind heat alerts.',p:'I²C 0x48 · 3V3_D'},
@@ -408,7 +409,7 @@
     sim:{t:'Nano-SIM holder',r:'Network identity',i:'SIM card',o:'Network access for the modem',u:'Any Indian SIM with SMS enabled.',p:'SMF05C ESD protection'},
     sd:{t:'microSD card',r:'Offline storage',i:'Data over SPI from the ESP32',o:'Stored readings back to the ESP32',u:'Keeps encrypted history for the personal baseline model and daily summaries when there is no phone or internet.',p:'CS←GPIO38 · SCK←39 · MOSI←40 · MISO→41 · 3V3_D'},
     drv:{t:'DRV8833 motor driver (v1 part)',r:'Haptic driver',i:'PWM from GPIO4 (motor A) and GPIO13 (motor B)',o:'Motor current from VSYS to 2 vibration motors',u:'Turns alerts into vibration patterns so warnings are felt, even on noisy worksites or by users with hearing loss.',p:'AIN1←GPIO4 · BIN1←GPIO13 · VM = VSYS · C1 10 µF'},
-    motorA:{t:'Vibration motor A (chest)',r:'Haptic output',i:'Drive current from DRV8833 AOUT',o:'Vibration on the chest',u:'Silent alert zone 1; also delivers the SereniSuit breathing biofeedback.',p:'3 V ERM coin motor'},
+    motorA:{t:'Vibration motor A (chest)',r:'Haptic output',i:'Drive current from DRV8833 AOUT',o:'Vibration on the chest',u:'Silent alert zone 1; also delivers the paced-breathing biofeedback.',p:'3 V ERM coin motor'},
     motorB:{t:'Vibration motor B (back)',r:'Haptic output',i:'Drive current from DRV8833 BOUT',o:'Vibration on the back',u:'Silent alert zone 2; different patterns mean different risks (heat vs. breathing vs. SOS countdown).',p:'3 V ERM coin motor'},
     buzzer:{t:'Piezo buzzer',r:'Audible alarm',i:'2.7 kHz PWM from GPIO21 via S8050 transistor',o:'Loud beep',u:'Calls for help from people nearby during SOS or a fall, when the wearer may not respond.',p:'GPIO21 → 1 kΩ → S8050'},
     sos:{t:'SOS button',r:'Manual emergency',i:'Wearer\'s press (hold 3 s)',o:'Low signal on GPIO14',u:'Lets the wearer call for help at any time; starts the SMS + GPS alert.',p:'GPIO14 · internal pull-up'},
@@ -435,33 +436,33 @@
 
   // ---------- pin table ----------
   const P = [
-    ['0','BTN_ACK','Acknowledge button (BOOT)','Control','v1 board'],
-    ['1','GSR_OUT','GSR SIG','Analog · ADC1','New'],
-    ['4','HAP_A','DRV8833 AIN1','PWM','v1'],
-    ['5','ECG_OUT','AD8232 OUTPUT','Analog · ADC1','v1'],
-    ['6','ECG_LO+','AD8232 LO+','Input','v1'],
-    ['7','ECG_LO−','AD8232 LO−','Input','v1'],
-    ['8','I2C_SDA','MAX30102, MAX30205, LSM6DSOX, SHT40, MAX17048, OLED','I²C','v1'],
-    ['9','I2C_SCL','Same 6 devices','I²C','v1'],
-    ['10','ECG_SDN','AD8232 SDN (was tied to 3V3)','Control','New'],
-    ['11','PPG_INT','MAX30102 INT','Interrupt','New'],
-    ['12','IMU_INT1','LSM6DSOX INT1','Interrupt','New'],
-    ['13','HAP_B','DRV8833 BIN1','PWM','New'],
-    ['14','BTN_SOS','SOS button','Control','New'],
-    ['15','GPS_TX','L76K RXD','UART2','New'],
-    ['16','GPS_RX','L76K TXD','UART2','New'],
-    ['17','PM_TX','SPS30 RX','UART1','New'],
-    ['18','PM_RX','SPS30 TX','UART1','New'],
-    ['19 / 20','USB D− / D+','USB-C','Native USB','New'],
-    ['21','BUZZER','S8050 base (1 kΩ)','PWM','New'],
-    ['38–41','SD_CS / SCK / MOSI / MISO','microSD','SPI','New'],
-    ['43','MODEM_TX','TXS0104E B1 → A7670 RXD','UART0','New'],
-    ['44','MODEM_RX','TXS0104E B2 ← A7670 TXD','UART0','New'],
-    ['47','MODEM_PWRKEY','NPN → A7670 PWRKEY','Control','New'],
-    ['48','CHG_PGOOD','BQ24074 PGOOD','Input','New'],
+    ['0','BTN_ACK','Acknowledge button (BOOT)','Control','v1 board','3'],
+    ['1','GSR_OUT','GSR SIG','Analog · ADC1','New','2'],
+    ['4','HAP_A','DRV8833 AIN1','PWM','v1','1'],
+    ['5','ECG_OUT','AD8232 OUTPUT','Analog · ADC1','v1','1'],
+    ['6','ECG_LO+','AD8232 LO+','Input','v1','1'],
+    ['7','ECG_LO−','AD8232 LO−','Input','v1','1'],
+    ['8','I2C_SDA','MAX30102, MAX30205, LSM6DSOX, SHT40, MAX17048, OLED','I²C','v1','1'],
+    ['9','I2C_SCL','Same 6 devices','I²C','v1','1'],
+    ['10','ECG_SDN','AD8232 SDN (was tied to 3V3)','Control','New','3'],
+    ['11','PPG_INT','MAX30102 INT','Interrupt','New','2'],
+    ['12','IMU_INT1','LSM6DSOX INT1','Interrupt','New','2–3'],
+    ['13','HAP_B','DRV8833 BIN1','PWM','New','2'],
+    ['14','BTN_SOS','SOS button','Control','New','3'],
+    ['15','GPS_TX','L76K RXD','UART2','New','3'],
+    ['16','GPS_RX','L76K TXD','UART2','New','3'],
+    ['17','PM_TX','SPS30 RX','UART1','New','3'],
+    ['18','PM_RX','SPS30 TX','UART1','New','3'],
+    ['19 / 20','USB D− / D+','USB-C','Native USB','New','3'],
+    ['21','BUZZER','S8050 base (1 kΩ)','PWM','New','3'],
+    ['38–41','SD_CS / SCK / MOSI / MISO','microSD','SPI','New','2'],
+    ['43','MODEM_TX','TXS0104E B1 → A7670 RXD','UART0','New','3'],
+    ['44','MODEM_RX','TXS0104E B2 ← A7670 TXD','UART0','New','3'],
+    ['47','MODEM_PWRKEY','NPN → A7670 PWRKEY','Control','New','3'],
+    ['48','CHG_PGOOD','BQ24074 PGOOD','Input','New','3'],
   ];
   const col = t => t.startsWith('Analog')?C.analog:t.startsWith('I²C')?C.sda:t.startsWith('UART')?C.uart:t==='SPI'?C.spi:t==='PWM'?C.pwm:t==='Native USB'?C.ctrl:C.ctrl;
-  document.querySelector('#pins tbody').innerHTML = P.map(r=>`<tr><td class="g">${r[0]}</td><td class="g">${esc(r[1])}</td><td>${esc(r[2])}</td><td><span class="sw" style="border-color:${col(r[3])}"></span>${esc(r[3])}</td><td><span class="tag${r[4]==='New'?' new':''}">${r[4]}</span></td></tr>`).join('');
+  document.querySelector('#pins tbody').innerHTML = P.map(r=>`<tr><td class="g">${r[0]}</td><td class="g">${esc(r[1])}</td><td>${esc(r[2])}</td><td><span class="sw" style="border-color:${col(r[3])}"></span>${esc(r[3])}</td><td><span class="tag${r[4]==='New'?' new':''}">${r[4]}</span></td><td class="g">${r[5]}</td></tr>`).join('');
 
   // ---------- tooltip behaviour ----------
   const tip=document.getElementById('tip'); let cur=null, pinned=false;
