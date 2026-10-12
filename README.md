@@ -32,8 +32,8 @@ map shows which phase wires each pin.
 | Path | What it is |
 | --- | --- |
 | [`phase-1/`](phase-1/) | Completed work: ECG firmware, Wi-Fi + Bluetooth dashboards, wiring diagrams, ECG model and training code |
-| [`phase-2/`](phase-2/) | Plan for multi-sensor stress sensing and biofeedback: parts, pins, models, exit checklist |
-| [`phase-3/`](phase-3/) | Plan for the remaining ArogyaAegis features |
+| [`phase-2/`](phase-2/) | Plan for multi-sensor stress sensing and biofeedback: parts, pins, models, exit checklist (completed by end of the november)|
+| [`phase-3/`](phase-3/) | Plan for the remaining ArogyaAegis features(completed by end of the december) |
 | [`docs/index.html`](docs/index.html) | Interactive wiring diagram (served by GitHub Pages) |
 | [`docs/app/`](docs/app/) | Bluetooth dashboard, live at https://thotapremkumar-tpk.github.io/ArogyaAegis-SIH/app/ |
 | [`assets/ArogyaAegis_SIH26181.pdf`](assets/ArogyaAegis_SIH26181.pdf) | SIH idea presentation (PDF) |
