@@ -90,8 +90,9 @@
   <div class="canvas" id="canvas"><svg id="dia" viewBox="0 0 2000 2810" role="img" aria-label="SereniSuit v2 wiring diagram"></svg></div>
 
   <h2>Pin map</h2>
+  <p class="hint" style="margin:0">Phase = when the pin gets wired: 1 = built (Demo 1) · 2 = complete SereniSuit · 3 = full ArogyaAegis. <a href="https://github.com/thotapremkumar-tpk/ArogyaAegis-SIH#roadmap--three-phases" style="color:var(--new)">Roadmap →</a></p>
   <div class="tablewrap"><table id="pins">
-    <thead><tr><th>GPIO</th><th>Signal</th><th>Connects to</th><th>Type</th><th>Status</th></tr></thead>
+    <thead><tr><th>GPIO</th><th>Signal</th><th>Connects to</th><th>Type</th><th>Status</th><th>Phase</th></tr></thead>
     <tbody></tbody>
   </table></div>
 
@@ -435,33 +436,33 @@
 
   // ---------- pin table ----------
   const P = [
-    ['0','BTN_ACK','Acknowledge button (BOOT)','Control','v1 board'],
-    ['1','GSR_OUT','GSR SIG','Analog · ADC1','New'],
-    ['4','HAP_A','DRV8833 AIN1','PWM','v1'],
-    ['5','ECG_OUT','AD8232 OUTPUT','Analog · ADC1','v1'],
-    ['6','ECG_LO+','AD8232 LO+','Input','v1'],
-    ['7','ECG_LO−','AD8232 LO−','Input','v1'],
-    ['8','I2C_SDA','MAX30102, MAX30205, LSM6DSOX, SHT40, MAX17048, OLED','I²C','v1'],
-    ['9','I2C_SCL','Same 6 devices','I²C','v1'],
-    ['10','ECG_SDN','AD8232 SDN (was tied to 3V3)','Control','New'],
-    ['11','PPG_INT','MAX30102 INT','Interrupt','New'],
-    ['12','IMU_INT1','LSM6DSOX INT1','Interrupt','New'],
-    ['13','HAP_B','DRV8833 BIN1','PWM','New'],
-    ['14','BTN_SOS','SOS button','Control','New'],
-    ['15','GPS_TX','L76K RXD','UART2','New'],
-    ['16','GPS_RX','L76K TXD','UART2','New'],
-    ['17','PM_TX','SPS30 RX','UART1','New'],
-    ['18','PM_RX','SPS30 TX','UART1','New'],
-    ['19 / 20','USB D− / D+','USB-C','Native USB','New'],
-    ['21','BUZZER','S8050 base (1 kΩ)','PWM','New'],
-    ['38–41','SD_CS / SCK / MOSI / MISO','microSD','SPI','New'],
-    ['43','MODEM_TX','TXS0104E B1 → A7670 RXD','UART0','New'],
-    ['44','MODEM_RX','TXS0104E B2 ← A7670 TXD','UART0','New'],
-    ['47','MODEM_PWRKEY','NPN → A7670 PWRKEY','Control','New'],
-    ['48','CHG_PGOOD','BQ24074 PGOOD','Input','New'],
+    ['0','BTN_ACK','Acknowledge button (BOOT)','Control','v1 board','3'],
+    ['1','GSR_OUT','GSR SIG','Analog · ADC1','New','2'],
+    ['4','HAP_A','DRV8833 AIN1','PWM','v1','1'],
+    ['5','ECG_OUT','AD8232 OUTPUT','Analog · ADC1','v1','1'],
+    ['6','ECG_LO+','AD8232 LO+','Input','v1','1'],
+    ['7','ECG_LO−','AD8232 LO−','Input','v1','1'],
+    ['8','I2C_SDA','MAX30102, MAX30205, LSM6DSOX, SHT40, MAX17048, OLED','I²C','v1','1'],
+    ['9','I2C_SCL','Same 6 devices','I²C','v1','1'],
+    ['10','ECG_SDN','AD8232 SDN (was tied to 3V3)','Control','New','3'],
+    ['11','PPG_INT','MAX30102 INT','Interrupt','New','2'],
+    ['12','IMU_INT1','LSM6DSOX INT1','Interrupt','New','2–3'],
+    ['13','HAP_B','DRV8833 BIN1','PWM','New','2'],
+    ['14','BTN_SOS','SOS button','Control','New','3'],
+    ['15','GPS_TX','L76K RXD','UART2','New','3'],
+    ['16','GPS_RX','L76K TXD','UART2','New','3'],
+    ['17','PM_TX','SPS30 RX','UART1','New','3'],
+    ['18','PM_RX','SPS30 TX','UART1','New','3'],
+    ['19 / 20','USB D− / D+','USB-C','Native USB','New','3'],
+    ['21','BUZZER','S8050 base (1 kΩ)','PWM','New','3'],
+    ['38–41','SD_CS / SCK / MOSI / MISO','microSD','SPI','New','2'],
+    ['43','MODEM_TX','TXS0104E B1 → A7670 RXD','UART0','New','3'],
+    ['44','MODEM_RX','TXS0104E B2 ← A7670 TXD','UART0','New','3'],
+    ['47','MODEM_PWRKEY','NPN → A7670 PWRKEY','Control','New','3'],
+    ['48','CHG_PGOOD','BQ24074 PGOOD','Input','New','3'],
   ];
   const col = t => t.startsWith('Analog')?C.analog:t.startsWith('I²C')?C.sda:t.startsWith('UART')?C.uart:t==='SPI'?C.spi:t==='PWM'?C.pwm:t==='Native USB'?C.ctrl:C.ctrl;
-  document.querySelector('#pins tbody').innerHTML = P.map(r=>`<tr><td class="g">${r[0]}</td><td class="g">${esc(r[1])}</td><td>${esc(r[2])}</td><td><span class="sw" style="border-color:${col(r[3])}"></span>${esc(r[3])}</td><td><span class="tag${r[4]==='New'?' new':''}">${r[4]}</span></td></tr>`).join('');
+  document.querySelector('#pins tbody').innerHTML = P.map(r=>`<tr><td class="g">${r[0]}</td><td class="g">${esc(r[1])}</td><td>${esc(r[2])}</td><td><span class="sw" style="border-color:${col(r[3])}"></span>${esc(r[3])}</td><td><span class="tag${r[4]==='New'?' new':''}">${r[4]}</span></td><td class="g">${r[5]}</td></tr>`).join('');
 
   // ---------- tooltip behaviour ----------
   const tip=document.getElementById('tip'); let cur=null, pinned=false;
