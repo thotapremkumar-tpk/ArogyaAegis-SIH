@@ -1,0 +1,1257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="ArogyaAegis Phase 2 and 3 perfboard build: pin map, power chain, board layout, wire checklist, breadboard tests, soldering steps and vest mounting.">
+<title>ArogyaAegis Perfboard Build</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a bench manual — one reading column, the board drawing in its own scroller, datasheet-style tables. */
+:root{
+  --paper:#f2f5f3; --panel:#ffffff; --ink:#14201b; --muted:#56665f; --rule:#d3ddd8;
+  --accent:#0f7357; --accent-ink:#ffffff; --body:#d3ddd8; --tint:#e3eee9; --warn:#9a5b06; --warn-bg:#fbf0dc;
+  --font-display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0d1412; --panel:#131d1a; --ink:#e3ebe7; --muted:#9bb0a7; --rule:#26352f;
+  --accent:#41c49a; --accent-ink:#06120d; --body:#2c3a35; --tint:#173029; --warn:#f2c14e; --warn-bg:#2a2210; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0d1412; --panel:#131d1a; --ink:#e3ebe7; --muted:#9bb0a7; --rule:#26352f;
+  --accent:#41c49a; --accent-ink:#06120d; --body:#2c3a35; --tint:#173029; --warn:#f2c14e; --warn-bg:#2a2210; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:15.5px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+.wrap{max-width:1080px;margin:0 auto;padding-block:40px 64px;display:grid;gap:56px}
+h1,h2,h3{font-family:var(--font-display);font-weight:700;letter-spacing:.01em;line-height:1.08;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.4rem,6vw,3.6rem)}
+h2{font-size:1.9rem}
+h3{font-size:1.25rem;font-weight:600}
+p{margin:0;max-width:68ch}
+.eyebrow{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.lead{font-size:1.08rem;color:var(--ink)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--font-mono);font-size:.86em}
+td.mono{white-space:nowrap}
+td.mono.small{white-space:normal}
+.small{font-size:.8em}
+code{font-family:var(--font-mono);font-size:.9em;background:var(--tint);padding:.05em .35em;border-radius:3px}
+section{display:grid;gap:18px;min-width:0}
+.sec-head{display:grid;gap:6px;border-top:2px solid var(--ink);padding-top:14px}
+.sec-head .eyebrow{color:var(--muted)}
+header.top{display:grid;gap:16px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:8px 0 0}
+.facts div{background:var(--panel);padding:12px 14px;display:grid;gap:2px;min-width:0}
+.facts dt{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.facts dd{margin:0;font-weight:500}
+.tbl{overflow-x:auto;border:1px solid var(--rule);background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:.92rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+thead th{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--tint)}
+tbody tr:last-child td{border-bottom:0}
+td.id{font-family:var(--font-mono);font-weight:600;white-space:nowrap}
+.tag{display:inline-block;font-family:var(--font-mono);font-size:.72rem;padding:1px 7px;border-radius:999px;border:1px solid var(--rule);color:var(--muted);white-space:nowrap}
+.tag.new{border-color:var(--accent);color:var(--accent)}
+.tag.moved{border-color:var(--warn);color:var(--warn)}
+.tag.buy{border-color:var(--warn);color:var(--warn)}
+.note{border-left:3px solid var(--accent);background:var(--tint);padding:12px 16px;display:grid;gap:6px}
+.warn{border-left:3px solid var(--warn);background:var(--warn-bg);padding:14px 18px;display:grid;gap:8px}
+.warn h3{color:var(--warn)}
+ul.clean,ol.steps{margin:0;padding-left:1.2em;display:grid;gap:8px}
+ol.steps li::marker{font-family:var(--font-mono);color:var(--accent);font-weight:600}
+pre{margin:0;background:var(--panel);border:1px solid var(--rule);padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:.84rem;line-height:1.5}
+/* power chain */
+.chain{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px}
+.chain .node{background:var(--panel);border:1px solid var(--rule);padding:10px 12px;display:grid;gap:2px;min-width:0;flex:1 1 140px}
+.chain .node b{font-family:var(--font-display);font-size:1.05rem;letter-spacing:.01em}
+.chain .node span{font-size:.82rem;color:var(--muted)}
+.chain .node.v{border-top:3px solid var(--sw)}
+.chain .arrow{align-self:center;font-family:var(--font-mono);color:var(--muted)}
+/* board viewer */
+.viewer{display:grid;gap:12px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.seg{display:inline-flex;border:1px solid var(--ink)}
+.seg button{font:inherit;font-size:.9rem;background:transparent;color:var(--ink);border:0;padding:7px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg button:focus-visible,.chip:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.8rem;display:inline-flex;align-items:center;gap:6px;background:var(--panel);color:var(--ink);border:1px solid var(--rule);padding:4px 10px 4px 8px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.sw{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--sw);box-shadow:0 0 0 1px rgba(0,0,0,.35);flex:none}
+.pbscroll{overflow-x:auto;border:1px solid var(--rule);background:var(--panel)}
+.pbscroll svg{display:block;width:100%;min-width:860px;height:auto}
+.pb text{font-family:var(--font-mono)}
+.pb .ax{font-size:9px;fill:var(--muted)}
+.pb .lbl{font-size:8.5px;fill:#eef3f0;paint-order:stroke;stroke:#0d241c;stroke-width:2.8px;stroke-linejoin:round}
+.pb .lbl.big{font-size:10px;font-weight:600}
+.pb .lbl.warn{fill:#f2c14e}
+.pb .pin{font-size:6.6px;fill:#7b8a84}
+.pb .pin.used{fill:#fff;font-weight:600;paint-order:stroke;stroke:#101315;stroke-width:2px}
+.pb [data-net]{transition:opacity .15s}
+.viewer.focus .pb [data-net]{opacity:.1}
+.viewer.focus .pb [data-net].hl{opacity:1}
+.pb [data-net]{cursor:pointer}
+.hint{font-size:.85rem;color:var(--muted)}
+/* wire list */
+.progress{display:flex;align-items:center;gap:12px;font-family:var(--font-mono);font-size:.85rem}
+.bar{flex:1;height:6px;background:var(--rule);max-width:320px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+tr.grp th{background:var(--tint);font-family:var(--font-display);font-size:1.02rem;font-weight:600;color:var(--ink);letter-spacing:.01em}
+tr.grp th span{font-family:var(--font-mono);font-size:.75rem;color:var(--muted);margin-left:6px}
+td.ck{width:34px}
+td.ck input{width:17px;height:17px;accent-color:var(--accent)}
+tr.done td:not(.ck){color:var(--muted);text-decoration:line-through;text-decoration-color:var(--rule)}
+td.kind{font-size:.8rem;color:var(--muted);white-space:nowrap}
+td.kind.wire{color:var(--ink)}
+.wires tr[data-wire]:hover{background:var(--tint)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.cols > *{min-width:0;display:grid;gap:10px;align-content:start}
+.test{display:grid;grid-template-columns:3.2rem 1fr;gap:4px 14px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.test:last-child{border-bottom:0}
+.test .n{font-family:var(--font-display);font-size:1.6rem;font-weight:700;color:var(--accent);line-height:1}
+.test h3{font-size:1.1rem}
+.test p{grid-column:2}
+.test .pass{grid-column:2;font-size:.92rem}
+.test .pass b{font-family:var(--font-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-right:6px}
+footer{font-size:.85rem;color:var(--muted);border-top:1px solid var(--rule);padding-top:16px;display:grid;gap:4px}
+@media (max-width:560px){h2{font-size:1.6rem}.wrap{gap:44px}th,td{padding:7px 9px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.bodymap{margin:0;display:grid;gap:10px}
+.bodymap .scroll{overflow-x:auto;border:1px solid var(--rule);background:var(--paper)}
+.bodymap svg{display:block;width:100%;min-width:640px;height:auto;color:var(--ink);padding:8px 4px}
+.bodymap text{font-family:var(--font-body);fill:currentColor}
+.bodymap .lb{font-size:13px;font-weight:500}
+.bodymap .hd{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;fill:var(--muted)}
+.bodymap .sub{font-size:11px;fill:var(--muted)}
+.bodymap .rt{font-size:11px;fill:var(--muted);font-style:italic}
+.bodymap figcaption{font-size:.9rem;color:var(--muted);max-width:72ch}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">ArogyaAegis · Phase 2 → Phase 3</div>
+  <h1>Perfboard build</h1>
+  <p class="lead">Test each new block on the breadboard with the final pin map, then move everything onto one 9 × 15 cm perfboard and mount it in a vest. The DevKit and every module plug into female headers, so you only solder headers, small parts and wire.</p>
+  <dl class="facts">
+    <div><dt>Board</dt><dd>9 × 15 cm double-sided, uses 52 × 33 holes</dd></div>
+    <div><dt>Power</dt><dd>1500 mAh LiPo → 5.0 V boost → DevKit</dd></div>
+    <div><dt>Runtime</dt><dd>About 4–5 h (estimate; measure in B9)</dd></div>
+    <div><dt>Layout check</dt><dd>22 nets joined, 0 shorts, 0 open nets</dd></div>
+  </dl>
+</header>
+
+<section id="pins">
+  <div class="sec-head"><div class="eyebrow">1 · Pin map</div><h2>Every signal on the J1 header</h2></div>
+  <p>The ECG and I²C pins stay where Demo 1 had them. Motor 1 moves from IO4 to IO17 so IO4 can read the battery. All analog inputs are on ADC1, which keeps working with Wi-Fi on.</p>
+  <div class="tbl"><table>
+    <thead><tr><th scope="col">Signal</th><th scope="col">GPIO</th><th scope="col">DevKit pin</th><th scope="col">Hole</th><th scope="col">vs Demo 1</th></tr></thead>
+    <tbody>
+      <tr><td>3.3 V out</td><td class="mono">—</td><td class="mono">J1-1</td><td class="mono">C24 R23</td><td><span class="tag">same</span></td></tr>
+      <tr><td>Battery sense (½ battery V)</td><td class="mono">IO4 · ADC1</td><td class="mono">J1-4</td><td class="mono">C21 R23</td><td><span class="tag new">new</span></td></tr>
+      <tr><td>ECG output</td><td class="mono">IO5 · ADC1</td><td class="mono">J1-5</td><td class="mono">C20 R23</td><td><span class="tag">same</span></td></tr>
+      <tr><td>ECG LO+</td><td class="mono">IO6</td><td class="mono">J1-6</td><td class="mono">C19 R23</td><td><span class="tag">same</span></td></tr>
+      <tr><td>ECG LO−</td><td class="mono">IO7</td><td class="mono">J1-7</td><td class="mono">C18 R23</td><td><span class="tag">same</span></td></tr>
+      <tr><td>Motor 1</td><td class="mono">IO17</td><td class="mono">J1-10</td><td class="mono">C15 R23</td><td><span class="tag moved">moved from IO4</span></td></tr>
+      <tr><td>Motor 2</td><td class="mono">IO18</td><td class="mono">J1-11</td><td class="mono">C14 R23</td><td><span class="tag new">new</span></td></tr>
+      <tr><td>I²C SDA (OLED, MPU-6050, J5)</td><td class="mono">IO8</td><td class="mono">J1-12</td><td class="mono">C13 R23</td><td><span class="tag">same</span></td></tr>
+      <tr><td>Breathing (flex sensor)</td><td class="mono">IO3 · ADC1</td><td class="mono">J1-13</td><td class="mono">C12 R23</td><td><span class="tag new">new</span></td></tr>
+      <tr><td>I²C SCL</td><td class="mono">IO9</td><td class="mono">J1-15</td><td class="mono">C10 R23</td><td><span class="tag">same</span></td></tr>
+      <tr><td>GSR (skin conductance)</td><td class="mono">IO10 · ADC1</td><td class="mono">J1-16</td><td class="mono">C9 R23</td><td><span class="tag new">new</span></td></tr>
+      <tr><td>SD MOSI</td><td class="mono">IO11</td><td class="mono">J1-17</td><td class="mono">C8 R23</td><td><span class="tag new">new</span></td></tr>
+      <tr><td>SD SCK</td><td class="mono">IO12</td><td class="mono">J1-18</td><td class="mono">C7 R23</td><td><span class="tag new">new</span></td></tr>
+      <tr><td>SD MISO</td><td class="mono">IO13</td><td class="mono">J1-19</td><td class="mono">C6 R23</td><td><span class="tag new">new</span></td></tr>
+      <tr><td>SD CS</td><td class="mono">IO14</td><td class="mono">J1-20</td><td class="mono">C5 R23</td><td><span class="tag new">new</span></td></tr>
+      <tr><td>5 V in (from the boost)</td><td class="mono">—</td><td class="mono">J1-21</td><td class="mono">C4 R23</td><td><span class="tag moved">was USB / power bank</span></td></tr>
+      <tr><td>Ground</td><td class="mono">—</td><td class="mono">J1-22</td><td class="mono">C3 R23</td><td><span class="tag">same</span></td></tr>
+    </tbody></table></div>
+  <div class="cols">
+    <div>
+      <h3>Firmware pin block</h3>
+<pre>#define PIN_ECG_OUT   5   // ADC1
+#define PIN_ECG_LOP   6
+#define PIN_ECG_LON   7
+#define PIN_SDA       8   // OLED 0x3C, MPU 0x68
+#define PIN_SCL       9
+#define PIN_FLEX      3   // ADC1, breathing
+#define PIN_GSR      10   // ADC1
+#define PIN_BATT      4   // ADC1, battery V = reading x 2
+#define PIN_MOTOR1   17   // was 4 in Demo 1
+#define PIN_MOTOR2   18
+#define PIN_SD_CS    14
+#define PIN_SD_MOSI  11
+#define PIN_SD_SCK   12
+#define PIN_SD_MISO  13</pre>
+    </div>
+    <div>
+      <h3>Notes</h3>
+      <ul class="clean">
+        <li>The J3 header only holds the board up. Its G pins are ground through the DevKit.</li>
+        <li>IO3 is a strapping pin, but a stock DevKit never samples it, so an analog input there is safe.</li>
+        <li>I²C addresses don't clash: OLED <code>0x3C</code>, MPU-6050 <code>0x68</code>, MAX30102 <code>0x57</code> (optional, on J5). Leave the MPU's AD0 pin open; the GY-521 board pulls it low.</li>
+        <li>The DRV8833 is not used. Each motor gets the 2N2222 stage that worked in Demo 1, plus a 10 kΩ base pull-down so the motors stay off while the ESP32 boots.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="power">
+  <div class="sec-head"><div class="eyebrow">2 · Power</div><h2>Battery to 5 V, with two grounds</h2></div>
+  <div class="chain" aria-label="Power chain">
+    <div class="node v" style="--sw:#c2246b"><b>LiPo 1500 mAh</b><span>3.0–4.2 V, PH2.0 plug</span></div><div class="arrow">→</div>
+    <div class="node v" style="--sw:#c2246b"><b>TP4056 Type-C</b><span>charging + protection, in the enclosure wall</span></div><div class="arrow">→</div>
+    <div class="node v" style="--sw:#c2246b"><b>Switch</b><span>in series with OUT+</span></div><div class="arrow">→</div>
+    <div class="node v" style="--sw:#c2246b"><b>J10 → battery rail</b><span>row 15, feeds both motors</span></div><div class="arrow">→</div>
+    <div class="node v" style="--sw:#e0303f"><b>MT3608 → 5.0 V</b><span>into the DevKit 5V pin</span></div><div class="arrow">→</div>
+    <div class="node v" style="--sw:#f08c2e"><b>DevKit 3.3 V</b><span>3.3 V bus for every sensor</span></div>
+  </div>
+  <div class="cols">
+    <div>
+      <h3>Rules for this power chain</h3>
+      <ul class="clean">
+        <li>Set the MT3608 to 5.0 V with the multimeter before it touches the DevKit. Many arrive set far higher.</li>
+        <li>Charge with the switch off. The TP4056 shouldn't feed a load while it charges.</li>
+        <li>Plug USB into the DevKit only with the switch off. Espressif treats USB and the 5V pin as separate power options, so use one at a time.</li>
+        <li>Motors run straight from the battery rail through the transistors, so their current never passes the ESP32's regulator.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Why two grounds</h3>
+      <p><b>Power GND</b> (brown on the drawing) carries motor and battery current on row 22. <b>Signal GND</b> (black) serves the ESP32 and sensors on row 19. They meet at one point: the MT3608's ground pad, which is wired to J1-22. Motor current never flows through the ECG's ground, which keeps buzzes out of the trace.</p>
+    </div>
+  </div>
+</section>
+
+<section id="layout">
+  <div class="sec-head"><div class="eyebrow">3 · Layout</div><h2>Hole-by-hole plan</h2></div>
+  <p>Hold the board with the DevKit's USB ports on the left. Count columns from the left edge and rows from the top. Dashed lines are bare tinned wire on the bottom; solid lines are insulated wire on top.</p>
+  <div class="viewer" id="viewer">
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Board side">
+        <button type="button" id="v-top" aria-pressed="true">Top · parts side</button>
+        <button type="button" id="v-bottom" aria-pressed="false">Bottom · solder side</button>
+      </div>
+      <button type="button" class="chip" id="clear" hidden>Show all nets</button>
+    </div>
+    <div class="chips" id="legend"><button type="button" class="chip" data-net="3V3" aria-pressed="false"><span class="sw" style="--sw:#f08c2e"></span>3.3 V</button>
+<button type="button" class="chip" data-net="GND" aria-pressed="false"><span class="sw" style="--sw:#15181a"></span>GND (signal)</button>
+<button type="button" class="chip" data-net="PGND" aria-pressed="false"><span class="sw" style="--sw:#6b4524"></span>GND (power)</button>
+<button type="button" class="chip" data-net="5V" aria-pressed="false"><span class="sw" style="--sw:#e0303f"></span>5 V</button>
+<button type="button" class="chip" data-net="VBAT" aria-pressed="false"><span class="sw" style="--sw:#c2246b"></span>Battery + (switched)</button>
+<button type="button" class="chip" data-net="SDA" aria-pressed="false"><span class="sw" style="--sw:#3d8fe0"></span>I²C SDA</button>
+<button type="button" class="chip" data-net="SCL" aria-pressed="false"><span class="sw" style="--sw:#f2cf3a"></span>I²C SCL</button>
+<button type="button" class="chip" data-net="ECG_OUT" aria-pressed="false"><span class="sw" style="--sw:#1fb39a"></span>ECG output</button>
+<button type="button" class="chip" data-net="ECG_LOP" aria-pressed="false"><span class="sw" style="--sw:#7fd8c6"></span>ECG LO+</button>
+<button type="button" class="chip" data-net="ECG_LON" aria-pressed="false"><span class="sw" style="--sw:#4fc3a8"></span>ECG LO−</button>
+<button type="button" class="chip" data-net="FLEX" aria-pressed="false"><span class="sw" style="--sw:#a05bd6"></span>Breathing (flex)</button>
+<button type="button" class="chip" data-net="GSR" aria-pressed="false"><span class="sw" style="--sw:#ff8fb8"></span>GSR</button>
+<button type="button" class="chip" data-net="BAT_SENSE" aria-pressed="false"><span class="sw" style="--sw:#2fc6dc"></span>Battery sense</button>
+<button type="button" class="chip" data-net="M1_CTRL" aria-pressed="false"><span class="sw" style="--sw:#c9b6f2"></span>Motor 1 control</button>
+<button type="button" class="chip" data-net="M2_CTRL" aria-pressed="false"><span class="sw" style="--sw:#a7b4f0"></span>Motor 2 control</button></div>
+    <div class="pbscroll" id="pane-top"><svg class="pb" viewBox="0 0 931 604" width="931" height="604" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Perfboard layout, top view">
+<defs><pattern id="hatch-top" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="none"/><line x1="0" y1="0" x2="0" y2="6" stroke="#f2c14e" stroke-width="1.4" opacity=".55"/></pattern></defs>
+<rect x="22.1" y="17.25" width="890.8000000000001" height="569.5" rx="6" fill="#1d4f40" stroke="#0f3127" stroke-width="2"/>
+<rect x="465.79999999999995" y="342.79999999999995" width="107.10000000000014" height="241.4000000000001" fill="url(#hatch-top)" stroke="#f2c14e" stroke-dasharray="4 3" stroke-width="1" opacity=".9"/>
+<pattern id="holes-top" x="25.5" y="21.5" width="17" height="17" patternUnits="userSpaceOnUse"><circle cx="8.5" cy="8.5" r="4.1" fill="#c5cbd0" fill-opacity="0.55"/><circle cx="8.5" cy="8.5" r="1.7" fill="#0b1a15"/></pattern>
+<rect x="25.5" y="21.5" width="884" height="561" fill="url(#holes-top)"/>
+<g class="part"><rect x="40.8" y="394.65" width="419.90000000000003" height="171.69999999999993" rx="4" fill="#15191c" fill-opacity=".72" stroke="#0a0c0d"/>
+<rect x="290.70000000000005" y="421.0" width="170.0" height="119.0" rx="2" fill="#8d96a0" fill-opacity=".45" stroke="#c6ccd2" stroke-opacity=".6"/>
+<rect x="419.9" y="421.0" width="40.80000000000007" height="119.0" fill="url(#hatch-top)"/>
+<rect x="32.3" y="431.20000000000005" width="28.900000000000006" height="34.0" rx="2" fill="#b9c0c6" stroke="#5d656c"/>
+<rect x="32.3" y="495.79999999999995" width="28.900000000000006" height="34.0" rx="2" fill="#b9c0c6" stroke="#5d656c"/>
+</g>
+<rect class="part" x="272.0" y="64.0" width="195.5" height="248.20000000000005" rx="3" fill="#a8322a" fill-opacity=".6" stroke="#0b0f12"/>
+<rect x="333.20000000000005" y="55.5" width="64.59999999999991" height="35.69999999999999" rx="2" fill="#20262b" stroke="#9aa3ab"/><text class="lbl" x="365.5" y="76.35" text-anchor="middle">electrode jack</text>
+<rect class="part" x="578.0" y="36.8" width="187.0" height="190.39999999999998" rx="3" fill="#1f3f7a" fill-opacity=".6" stroke="#0b0f12"/>
+<rect x="598.4000000000001" y="81.0" width="146.19999999999982" height="105.39999999999998" fill="#0b1830" fill-opacity=".75"/>
+<rect class="part" x="51.0" y="36.8" width="153.0" height="119.00000000000001" rx="3" fill="#2a4d8f" fill-opacity=".6" stroke="#0b0f12"/>
+<rect class="part" x="629.0" y="431.20000000000005" width="238.0" height="115.59999999999991" rx="3" fill="#26303a" fill-opacity=".6" stroke="#0b0f12" stroke-dasharray="6 3"/>
+<polyline data-net="3V3" data-wire="B1" points="68.0,268.0 425.0,268.0" fill="none" stroke="#f08c2e" stroke-width="3.2" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="GND" data-wire="B2" points="68.0,336.0 391.0,336.0" fill="none" stroke="#15181a" stroke-width="3.2" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="VBAT" data-wire="B3" points="578.0,268.0 901.0,268.0" fill="none" stroke="#c2246b" stroke-width="3.2" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="PGND" data-wire="B4" points="578.0,387.0 901.0,387.0" fill="none" stroke="#6b4524" stroke-width="3.2" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="3V3" data-wire="L1" points="425.0,404.0 425.0,268.0" fill="none" stroke="#f08c2e" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="GND" data-wire="L2" points="68.0,336.0 68.0,404.0" fill="none" stroke="#15181a" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="5V" data-wire="L3" points="85.0,353.0 85.0,404.0" fill="none" stroke="#e0303f" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="3V3" data-wire="L4" points="68.0,47.0 68.0,268.0" fill="none" stroke="#f08c2e" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="3V3" data-wire="L5" points="340.0,302.0 340.0,268.0" fill="none" stroke="#f08c2e" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="3V3" data-wire="L6" points="408.0,302.0 408.0,268.0" fill="none" stroke="#f08c2e" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="GND" data-wire="L7" points="323.0,302.0 323.0,336.0" fill="none" stroke="#15181a" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="3V3" data-wire="L8" points="119.0,200.0 119.0,268.0" fill="none" stroke="#f08c2e" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="FLEX" data-wire="L9" points="136.0,200.0 136.0,217.0" fill="none" stroke="#a05bd6" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="3V3" data-wire="L10" points="204.0,200.0 204.0,268.0" fill="none" stroke="#f08c2e" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="BAT_SENSE" data-wire="L11" points="374.0,353.0 374.0,404.0" fill="none" stroke="#2fc6dc" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="SD_CS" data-wire="L_SD5" points="102.0,370.0 102.0,404.0" fill="none" stroke="#9fd3f5" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="SD_MISO" data-wire="L_SD6" points="119.0,370.0 119.0,404.0" fill="none" stroke="#9fd3f5" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="SD_SCK" data-wire="L_SD7" points="136.0,370.0 136.0,404.0" fill="none" stroke="#9fd3f5" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="SD_MOSI" data-wire="L_SD8" points="153.0,370.0 153.0,404.0" fill="none" stroke="#9fd3f5" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="VBAT" data-wire="L12" points="578.0,285.0 578.0,268.0" fill="none" stroke="#c2246b" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="BAT_SENSE" data-wire="L13" points="578.0,302.0 578.0,319.0" fill="none" stroke="#2fc6dc" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="PGND" data-wire="L14" points="578.0,336.0 578.0,387.0" fill="none" stroke="#6b4524" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="VBAT" data-wire="L15" points="595.0,285.0 595.0,268.0" fill="none" stroke="#c2246b" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="PGND" data-wire="L16" points="595.0,302.0 595.0,387.0" fill="none" stroke="#6b4524" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="M1_B" data-wire="L_B1" points="646.0,353.0 680.0,353.0" fill="none" stroke="#d9dde2" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="PGND" data-wire="L_E1" points="663.0,370.0 663.0,387.0" fill="none" stroke="#6b4524" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="PGND" data-wire="L_P1" points="680.0,370.0 680.0,387.0" fill="none" stroke="#6b4524" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="M1_NEG" data-wire="L_N1" points="697.0,319.0 663.0,319.0" fill="none" stroke="#d9dde2" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="M1_NEG" data-wire="L_C1" points="663.0,319.0 663.0,336.0" fill="none" stroke="#d9dde2" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="VBAT" data-wire="L_V1" points="697.0,302.0 697.0,268.0" fill="none" stroke="#c2246b" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="M2_B" data-wire="L_B2" points="782.0,353.0 816.0,353.0" fill="none" stroke="#d9dde2" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="PGND" data-wire="L_E2" points="799.0,370.0 799.0,387.0" fill="none" stroke="#6b4524" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="PGND" data-wire="L_P2" points="816.0,370.0 816.0,387.0" fill="none" stroke="#6b4524" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="M2_NEG" data-wire="L_N2" points="833.0,319.0 799.0,319.0" fill="none" stroke="#d9dde2" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="M2_NEG" data-wire="L_C2" points="799.0,319.0 799.0,336.0" fill="none" stroke="#d9dde2" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="VBAT" data-wire="L_V2" points="833.0,302.0 833.0,268.0" fill="none" stroke="#c2246b" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="VBAT" data-wire="L17" points="901.0,302.0 901.0,268.0" fill="none" stroke="#c2246b" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<polyline data-net="PGND" data-wire="L18" points="901.0,319.0 901.0,387.0" fill="none" stroke="#6b4524" stroke-width="2.4" stroke-dasharray="2 3" stroke-linecap="round" opacity=".75"/>
+<rect class="part" x="59" y="361" width="103" height="18" rx="2" fill="#1a1a1a" fill-opacity=".55" stroke="#f3eedf"/>
+<rect class="part" x="484" y="55" width="69" height="23" rx="2" fill="#ece6d6" fill-opacity=".55" stroke="#f3eedf"/>
+<rect class="part" x="110" y="191" width="35" height="23" rx="2" fill="#ece6d6" fill-opacity=".55" stroke="#f3eedf"/>
+<rect class="part" x="178" y="191" width="52" height="23" rx="2" fill="#ece6d6" fill-opacity=".55" stroke="#f3eedf"/>
+<rect class="part" x="688" y="293" width="18" height="35" rx="2" fill="#ece6d6" fill-opacity=".55" stroke="#f3eedf"/>
+<rect class="part" x="824" y="293" width="18" height="35" rx="2" fill="#ece6d6" fill-opacity=".55" stroke="#f3eedf"/>
+<rect class="part" x="892" y="293" width="18" height="35" rx="2" fill="#ece6d6" fill-opacity=".55" stroke="#f3eedf"/>
+<g class="part" data-net="FLEX"><line x1="136" y1="217" x2="136" y2="336" stroke="#c9cdd1" stroke-width="1.6"/><rect x="131" y="260.5" width="10" height="32" rx="4" fill="#d6b98b" stroke="#6b5532"/><text class="lbl dark" x="145" y="279.5">R5</text></g>
+<g class="part"><rect x="368.5" y="334" width="11" height="21" rx="5" fill="#d9a441" stroke="#6e4f12"/><text class="lbl" x="383" y="347.5">C3</text></g>
+<g class="part"><circle cx="76.5" cy="353.0" r="12" fill="#243b6b" fill-opacity=".85" stroke="#0e1a33"/><text class="lbl" x="76.5" y="356.0" text-anchor="middle">C1</text><text class="lbl" x="85" y="347" text-anchor="middle">+</text></g>
+<g class="part"><line x1="578" y1="285" x2="578" y2="302" stroke="#c9cdd1" stroke-width="1.6"/><circle cx="578" cy="285" r="5.6" fill="#d6b98b" stroke="#6b5532"/></g>
+<g class="part"><line x1="578" y1="319" x2="578" y2="336" stroke="#c9cdd1" stroke-width="1.6"/><circle cx="578" cy="319" r="5.6" fill="#d6b98b" stroke="#6b5532"/></g>
+<g class="part"><circle cx="595.0" cy="293.5" r="12" fill="#243b6b" fill-opacity=".85" stroke="#0e1a33"/><text class="lbl" x="595.0" y="296.5" text-anchor="middle">C2</text><text class="lbl" x="595" y="280" text-anchor="middle">+</text></g>
+<g class="part"><line x1="629" y1="353" x2="646" y2="353" stroke="#c9cdd1" stroke-width="1.6"/><circle cx="629" cy="353" r="5.6" fill="#d6b98b" stroke="#6b5532"/></g>
+<g class="part"><path d="M669,329 L669,377 Q645,353.0 669,329 Z" fill="#1b1d1f" fill-opacity=".72" stroke="#6c7378"/><text class="lbl" x="655" y="356.0" text-anchor="end">Q1</text></g>
+<g class="part"><line x1="680" y1="353" x2="680" y2="370" stroke="#c9cdd1" stroke-width="1.6"/><circle cx="680" cy="353" r="5.6" fill="#d6b98b" stroke="#6b5532"/></g>
+<g class="part"><line x1="663" y1="268" x2="663" y2="319" stroke="#c9cdd1" stroke-width="1.4"/><rect x="658.5" y="283.5" width="9" height="20" rx="3" fill="#e9a25a" fill-opacity=".9" stroke="#7a4a17"/><rect x="658.5" y="283.5" width="9" height="4" fill="#111"/><text class="lbl" x="656" y="296.5" text-anchor="end">D1</text></g>
+<g class="part"><line x1="765" y1="353" x2="782" y2="353" stroke="#c9cdd1" stroke-width="1.6"/><circle cx="765" cy="353" r="5.6" fill="#d6b98b" stroke="#6b5532"/></g>
+<g class="part"><path d="M805,329 L805,377 Q781,353.0 805,329 Z" fill="#1b1d1f" fill-opacity=".72" stroke="#6c7378"/><text class="lbl" x="791" y="356.0" text-anchor="end">Q2</text></g>
+<g class="part"><line x1="816" y1="353" x2="816" y2="370" stroke="#c9cdd1" stroke-width="1.6"/><circle cx="816" cy="353" r="5.6" fill="#d6b98b" stroke="#6b5532"/></g>
+<g class="part"><line x1="799" y1="268" x2="799" y2="319" stroke="#c9cdd1" stroke-width="1.4"/><rect x="794.5" y="283.5" width="9" height="20" rx="3" fill="#e9a25a" fill-opacity=".9" stroke="#7a4a17"/><rect x="794.5" y="283.5" width="9" height="4" fill="#111"/><text class="lbl" x="792" y="296.5" text-anchor="end">D2</text></g>
+<circle data-net="3V3" cx="425" cy="404" r="4.6" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="3V3" cx="408" cy="404" r="4.6" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="BAT_SENSE" cx="374" cy="404" r="4.6" fill="none" stroke="#2fc6dc" stroke-width="2.4"/>
+<circle data-net="ECG_OUT" cx="357" cy="404" r="4.6" fill="none" stroke="#1fb39a" stroke-width="2.4"/>
+<circle data-net="ECG_LOP" cx="340" cy="404" r="4.6" fill="none" stroke="#7fd8c6" stroke-width="2.4"/>
+<circle data-net="ECG_LON" cx="323" cy="404" r="4.6" fill="none" stroke="#4fc3a8" stroke-width="2.4"/>
+<circle data-net="M1_CTRL" cx="272" cy="404" r="4.6" fill="none" stroke="#c9b6f2" stroke-width="2.4"/>
+<circle data-net="M2_CTRL" cx="255" cy="404" r="4.6" fill="none" stroke="#a7b4f0" stroke-width="2.4"/>
+<circle data-net="SDA" cx="238" cy="404" r="4.6" fill="none" stroke="#3d8fe0" stroke-width="2.4"/>
+<circle data-net="FLEX" cx="221" cy="404" r="4.6" fill="none" stroke="#a05bd6" stroke-width="2.4"/>
+<circle data-net="SCL" cx="187" cy="404" r="4.6" fill="none" stroke="#f2cf3a" stroke-width="2.4"/>
+<circle data-net="GSR" cx="170" cy="404" r="4.6" fill="none" stroke="#ff8fb8" stroke-width="2.4"/>
+<circle data-net="SD_MOSI" cx="153" cy="404" r="4.6" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SD_SCK" cx="136" cy="404" r="4.6" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SD_MISO" cx="119" cy="404" r="4.6" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SD_CS" cx="102" cy="404" r="4.6" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="5V" cx="85" cy="404" r="4.6" fill="none" stroke="#e0303f" stroke-width="2.4"/>
+<circle data-net="GND" cx="68" cy="404" r="4.6" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="GND" cx="425" cy="557" r="4.6" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="GND" cx="85" cy="557" r="4.6" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="GND" cx="68" cy="557" r="4.6" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="GND" cx="323" cy="302" r="4.6" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="3V3" cx="340" cy="302" r="4.6" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="ECG_OUT" cx="357" cy="302" r="4.6" fill="none" stroke="#1fb39a" stroke-width="2.4"/>
+<circle data-net="ECG_LON" cx="374" cy="302" r="4.6" fill="none" stroke="#4fc3a8" stroke-width="2.4"/>
+<circle data-net="ECG_LOP" cx="391" cy="302" r="4.6" fill="none" stroke="#7fd8c6" stroke-width="2.4"/>
+<circle data-net="3V3" cx="408" cy="302" r="4.6" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="GND" cx="646" cy="47" r="4.6" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="3V3" cx="663" cy="47" r="4.6" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="SCL" cx="680" cy="47" r="4.6" fill="none" stroke="#f2cf3a" stroke-width="2.4"/>
+<circle data-net="SDA" cx="697" cy="47" r="4.6" fill="none" stroke="#3d8fe0" stroke-width="2.4"/>
+<circle data-net="3V3" cx="68" cy="47" r="4.6" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="GND" cx="85" cy="47" r="4.6" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="SCL" cx="102" cy="47" r="4.6" fill="none" stroke="#f2cf3a" stroke-width="2.4"/>
+<circle data-net="SDA" cx="119" cy="47" r="4.6" fill="none" stroke="#3d8fe0" stroke-width="2.4"/>
+<circle data-net="GND" cx="68" cy="370" r="4.6" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="5V" cx="85" cy="370" r="4.6" fill="none" stroke="#e0303f" stroke-width="2.4"/>
+<circle data-net="SD_CS" cx="102" cy="370" r="4.6" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SD_MISO" cx="119" cy="370" r="4.6" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SD_SCK" cx="136" cy="370" r="4.6" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SD_MOSI" cx="153" cy="370" r="4.6" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SDA" cx="493" cy="64" r="4.6" fill="none" stroke="#3d8fe0" stroke-width="2.4"/>
+<circle data-net="SCL" cx="510" cy="64" r="4.6" fill="none" stroke="#f2cf3a" stroke-width="2.4"/>
+<circle data-net="GND" cx="527" cy="64" r="4.6" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="3V3" cx="544" cy="64" r="4.6" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="3V3" cx="119" cy="200" r="4.6" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="FLEX" cx="136" cy="200" r="4.6" fill="none" stroke="#a05bd6" stroke-width="2.4"/>
+<circle data-net="GSR" cx="187" cy="200" r="4.6" fill="none" stroke="#ff8fb8" stroke-width="2.4"/>
+<circle data-net="3V3" cx="204" cy="200" r="4.6" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="GND" cx="221" cy="200" r="4.6" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="697" cy="302" r="4.6" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="M1_NEG" cx="697" cy="319" r="4.6" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="833" cy="302" r="4.6" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="M2_NEG" cx="833" cy="319" r="4.6" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="901" cy="302" r="4.6" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="PGND" cx="901" cy="319" r="4.6" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="FLEX" cx="136" cy="217" r="4.6" fill="none" stroke="#a05bd6" stroke-width="2.4"/>
+<circle data-net="GND" cx="136" cy="336" r="4.6" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="GND" cx="374" cy="336" r="4.6" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="BAT_SENSE" cx="374" cy="353" r="4.6" fill="none" stroke="#2fc6dc" stroke-width="2.4"/>
+<circle data-net="5V" cx="85" cy="353" r="4.6" fill="none" stroke="#e0303f" stroke-width="2.4"/>
+<circle data-net="GND" cx="68" cy="353" r="4.6" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="578" cy="285" r="4.6" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="BAT_SENSE" cx="578" cy="302" r="4.6" fill="none" stroke="#2fc6dc" stroke-width="2.4"/>
+<circle data-net="BAT_SENSE" cx="578" cy="319" r="4.6" fill="none" stroke="#2fc6dc" stroke-width="2.4"/>
+<circle data-net="PGND" cx="578" cy="336" r="4.6" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="595" cy="285" r="4.6" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="PGND" cx="595" cy="302" r="4.6" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="M1_CTRL" cx="629" cy="353" r="4.6" fill="none" stroke="#c9b6f2" stroke-width="2.4"/>
+<circle data-net="M1_B" cx="646" cy="353" r="4.6" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="M1_NEG" cx="663" cy="336" r="4.6" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="M1_B" cx="663" cy="353" r="4.6" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="PGND" cx="663" cy="370" r="4.6" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="M1_B" cx="680" cy="353" r="4.6" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="PGND" cx="680" cy="370" r="4.6" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="663" cy="268" r="4.6" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="M1_NEG" cx="663" cy="319" r="4.6" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="M2_CTRL" cx="765" cy="353" r="4.6" fill="none" stroke="#a7b4f0" stroke-width="2.4"/>
+<circle data-net="M2_B" cx="782" cy="353" r="4.6" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="M2_NEG" cx="799" cy="336" r="4.6" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="M2_B" cx="799" cy="353" r="4.6" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="PGND" cx="799" cy="370" r="4.6" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="M2_B" cx="816" cy="353" r="4.6" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="PGND" cx="816" cy="370" r="4.6" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="799" cy="268" r="4.6" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="M2_NEG" cx="799" cy="319" r="4.6" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<g data-net="5V"><rect x="634.2" y="450" width="10" height="10" fill="#d8b04a" stroke="#5b4510"/><text class="lbl" x="647.2" y="458.5" text-anchor="start">VOUT+</text></g>
+<g data-net="GND"><rect x="634.2" y="518" width="10" height="10" fill="#d8b04a" stroke="#5b4510"/><text class="lbl" x="647.2" y="526.5" text-anchor="start">VOUT−</text></g>
+<g data-net="VBAT"><rect x="851.8" y="450" width="10" height="10" fill="#d8b04a" stroke="#5b4510"/><text class="lbl" x="848.8" y="458.5" text-anchor="end">VIN+</text></g>
+<g data-net="PGND"><rect x="851.8" y="518" width="10" height="10" fill="#d8b04a" stroke="#5b4510"/><text class="lbl" x="848.8" y="526.5" text-anchor="end">VIN−</text></g>
+<g data-net="ECG_OUT" data-wire="W1"><polyline points="357.0,302.0 357.0,404.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="357.0,302.0 357.0,404.0" fill="none" stroke="#1fb39a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="ECG_LOP" data-wire="W2"><polyline points="391.0,302.0 391.0,317.3 340.0,317.3 340.0,404.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="391.0,302.0 391.0,317.3 340.0,317.3 340.0,404.0" fill="none" stroke="#7fd8c6" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="ECG_LON" data-wire="W3"><polyline points="374.0,302.0 374.0,327.5 316.2,327.5 316.2,395.5 323.0,395.5 323.0,404.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="374.0,302.0 374.0,327.5 316.2,327.5 316.2,395.5 323.0,395.5 323.0,404.0" fill="none" stroke="#4fc3a8" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="GND" data-wire="W4"><polyline points="85.0,47.0 85.0,336.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="85.0,47.0 85.0,336.0" fill="none" stroke="#15181a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="SCL" data-wire="W5"><polyline points="102.0,47.0 102.0,172.8 244.8,172.8 244.8,392.1 187.0,392.1 187.0,404.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="102.0,47.0 102.0,172.8 244.8,172.8 244.8,392.1 187.0,392.1 187.0,404.0" fill="none" stroke="#f2cf3a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="SDA" data-wire="W6"><polyline points="119.0,47.0 119.0,167.7 249.9,167.7 249.9,398.9 238.0,398.9 238.0,404.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="119.0,47.0 119.0,167.7 249.9,167.7 249.9,398.9 238.0,398.9 238.0,404.0" fill="none" stroke="#3d8fe0" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="3V3" data-wire="W7"><polyline points="68.0,47.0 68.0,24.9 544.0,24.9 544.0,64.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="68.0,47.0 68.0,24.9 544.0,24.9 544.0,64.0" fill="none" stroke="#f08c2e" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="GND" data-wire="W8"><polyline points="85.0,47.0 85.0,29.1 527.0,29.1 527.0,64.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="85.0,47.0 85.0,29.1 527.0,29.1 527.0,64.0" fill="none" stroke="#15181a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="SCL" data-wire="W9"><polyline points="102.0,47.0 102.0,33.4 510.0,33.4 510.0,64.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="102.0,47.0 102.0,33.4 510.0,33.4 510.0,64.0" fill="none" stroke="#f2cf3a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="SDA" data-wire="W10"><polyline points="119.0,47.0 119.0,37.6 493.0,37.6 493.0,64.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="119.0,47.0 119.0,37.6 493.0,37.6 493.0,64.0" fill="none" stroke="#3d8fe0" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="SDA" data-wire="W11"><polyline points="493.0,64.0 493.0,94.6 697.0,94.6 697.0,47.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="493.0,64.0 493.0,94.6 697.0,94.6 697.0,47.0" fill="none" stroke="#3d8fe0" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="SCL" data-wire="W12"><polyline points="510.0,64.0 510.0,89.5 680.0,89.5 680.0,47.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="510.0,64.0 510.0,89.5 680.0,89.5 680.0,47.0" fill="none" stroke="#f2cf3a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="GND" data-wire="W13"><polyline points="527.0,64.0 527.0,84.4 646.0,84.4 646.0,47.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="527.0,64.0 527.0,84.4 646.0,84.4 646.0,47.0" fill="none" stroke="#15181a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="3V3" data-wire="W14"><polyline points="544.0,64.0 544.0,79.3 663.0,79.3 663.0,47.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="544.0,64.0 544.0,79.3 663.0,79.3 663.0,47.0" fill="none" stroke="#f08c2e" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="FLEX" data-wire="W15"><polyline points="136.0,217.0 159.8,217.0 159.8,353.0 221.0,353.0 221.0,404.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="136.0,217.0 159.8,217.0 159.8,353.0 221.0,353.0 221.0,404.0" fill="none" stroke="#a05bd6" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="GSR" data-wire="W16"><polyline points="187.0,200.0 187.0,223.8 170.0,223.8 170.0,404.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="187.0,200.0 187.0,223.8 170.0,223.8 170.0,404.0" fill="none" stroke="#ff8fb8" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="GND" data-wire="W17"><polyline points="221.0,200.0 221.0,336.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="221.0,200.0 221.0,336.0" fill="none" stroke="#15181a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="BAT_SENSE" data-wire="W18"><polyline points="578.0,319.0 566.1,319.0 566.1,346.2 380.8,346.2 380.8,353.0 374.0,353.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="578.0,319.0 566.1,319.0 566.1,346.2 380.8,346.2 380.8,353.0 374.0,353.0" fill="none" stroke="#2fc6dc" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="M1_CTRL" data-wire="W19"><polyline points="272.0,404.0 272.0,376.8 622.2,376.8 622.2,353.0 629.0,353.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="272.0,404.0 272.0,376.8 622.2,376.8 622.2,353.0 629.0,353.0" fill="none" stroke="#c9b6f2" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="M2_CTRL" data-wire="W20"><polyline points="255.0,404.0 255.0,383.6 758.2,383.6 758.2,353.0 765.0,353.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="255.0,404.0 255.0,383.6 758.2,383.6 758.2,353.0 765.0,353.0" fill="none" stroke="#a7b4f0" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="5V" data-wire="W21"><polyline points="639.2,455.0 618.8,455.0 618.8,410.8 567.8,410.8 567.8,361.5 91.8,361.5 91.8,387.0 85.0,387.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="639.2,455.0 618.8,455.0 618.8,410.8 567.8,410.8 567.8,361.5 91.8,361.5 91.8,387.0 85.0,387.0" fill="none" stroke="#e0303f" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="GND" data-wire="W22"><polyline points="639.2,523.0 608.6,523.0 608.6,415.9 562.7,415.9 562.7,366.6 61.2,366.6 61.2,387.0 68.0,387.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="639.2,523.0 608.6,523.0 608.6,415.9 562.7,415.9 562.7,366.6 61.2,366.6 61.2,387.0 68.0,387.0" fill="none" stroke="#15181a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="VBAT" data-wire="W23"><polyline points="856.8,455.0 890.8,455.0 890.8,285.0 901.0,285.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="856.8,455.0 890.8,455.0 890.8,285.0 901.0,285.0" fill="none" stroke="#c2246b" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<g data-net="PGND" data-wire="W24"><polyline points="856.8,523.0 872.1,523.0 872.1,387.0 867.0,387.0" fill="none" stroke="#06100c" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round" opacity=".55"/><polyline points="856.8,523.0 872.1,523.0 872.1,387.0 867.0,387.0" fill="none" stroke="#6b4524" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></g>
+<text class="ax" x="34" y="12" text-anchor="middle">1</text>
+<text class="ax" x="34" y="596" text-anchor="middle">1</text>
+<text class="ax" x="102" y="12" text-anchor="middle">5</text>
+<text class="ax" x="102" y="596" text-anchor="middle">5</text>
+<text class="ax" x="187" y="12" text-anchor="middle">10</text>
+<text class="ax" x="187" y="596" text-anchor="middle">10</text>
+<text class="ax" x="272" y="12" text-anchor="middle">15</text>
+<text class="ax" x="272" y="596" text-anchor="middle">15</text>
+<text class="ax" x="357" y="12" text-anchor="middle">20</text>
+<text class="ax" x="357" y="596" text-anchor="middle">20</text>
+<text class="ax" x="442" y="12" text-anchor="middle">25</text>
+<text class="ax" x="442" y="596" text-anchor="middle">25</text>
+<text class="ax" x="527" y="12" text-anchor="middle">30</text>
+<text class="ax" x="527" y="596" text-anchor="middle">30</text>
+<text class="ax" x="612" y="12" text-anchor="middle">35</text>
+<text class="ax" x="612" y="596" text-anchor="middle">35</text>
+<text class="ax" x="697" y="12" text-anchor="middle">40</text>
+<text class="ax" x="697" y="596" text-anchor="middle">40</text>
+<text class="ax" x="782" y="12" text-anchor="middle">45</text>
+<text class="ax" x="782" y="596" text-anchor="middle">45</text>
+<text class="ax" x="867" y="12" text-anchor="middle">50</text>
+<text class="ax" x="867" y="596" text-anchor="middle">50</text>
+<text class="ax" x="901" y="12" text-anchor="middle">52</text>
+<text class="ax" x="901" y="596" text-anchor="middle">52</text>
+<text class="ax" x="14" y="33.5" text-anchor="middle">1</text>
+<text class="ax" x="923" y="33.5" text-anchor="middle">1</text>
+<text class="ax" x="14" y="101.5" text-anchor="middle">5</text>
+<text class="ax" x="923" y="101.5" text-anchor="middle">5</text>
+<text class="ax" x="14" y="186.5" text-anchor="middle">10</text>
+<text class="ax" x="923" y="186.5" text-anchor="middle">10</text>
+<text class="ax" x="14" y="271.5" text-anchor="middle">15</text>
+<text class="ax" x="923" y="271.5" text-anchor="middle">15</text>
+<text class="ax" x="14" y="356.5" text-anchor="middle">20</text>
+<text class="ax" x="923" y="356.5" text-anchor="middle">20</text>
+<text class="ax" x="14" y="441.5" text-anchor="middle">25</text>
+<text class="ax" x="923" y="441.5" text-anchor="middle">25</text>
+<text class="ax" x="14" y="526.5" text-anchor="middle">30</text>
+<text class="ax" x="923" y="526.5" text-anchor="middle">30</text>
+<text class="ax" x="14" y="577.5" text-anchor="middle">33</text>
+<text class="ax" x="923" y="577.5" text-anchor="middle">33</text>
+<text class="lbl warn" x="519.35" y="489" text-anchor="middle">antenna</text><text class="lbl warn" x="519.35" y="500" text-anchor="middle">keep clear</text>
+<text class="lbl" x="66.3" y="449.9">USB-C</text>
+<text class="lbl big" x="178.5" y="512.8">ESP32-S3-DevKitC-1</text>
+<text class="lbl" x="178.5" y="533.2">sits in two 1×22 female headers</text>
+<text class="lbl big" x="369.75" y="191.10000000000002" text-anchor="middle">AD8232 ECG</text>
+<text class="lbl big" x="671.5" y="135.0" text-anchor="middle">SSD1306 OLED</text>
+<text class="lbl big" x="671.5" y="136.7" text-anchor="middle">SSD1306 OLED</text>
+<text class="lbl big" x="127.5" y="99.30000000000001" text-anchor="middle">MPU-6050</text>
+<text class="lbl big" x="748.0" y="492.0" text-anchor="middle">MT3608 boost (set 5.0 V)</text>
+<text class="lbl" x="748.0" y="504.0" text-anchor="middle">fixed with foam tape · pads wired</text>
+<text class="lbl" x="165" y="373">P1 SD port</text>
+<text class="lbl" x="518.5" y="110.75" text-anchor="middle">J5 I²C-EXT</text>
+<text class="lbl" x="127.5" y="187" text-anchor="middle">J6 FLEX</text>
+<text class="lbl" x="204.0" y="187" text-anchor="middle">J7 GSR</text>
+<text class="lbl" x="697.0" y="289" text-anchor="middle">J8 MOTOR 1</text>
+<text class="lbl" x="833.0" y="289" text-anchor="middle">J9 MOTOR 2</text>
+<text class="lbl" x="889" y="338" text-anchor="end">J10 BAT IN</text>
+<text class="lbl" x="571" y="296.5" text-anchor="end">R6</text>
+<text class="lbl" x="571" y="330.5" text-anchor="end">R7</text>
+<text class="lbl" x="637.5" y="344.0" text-anchor="middle">R1</text>
+<text class="lbl" x="688" y="364.5" text-anchor="start">R2</text>
+<text class="lbl" x="773.5" y="344.0" text-anchor="middle">R3</text>
+<text class="lbl" x="824" y="364.5" text-anchor="start">R4</text>
+<text class="pin used" x="428" y="412" transform="rotate(90 428 412)">3V3</text>
+<text class="pin used" x="411" y="412" transform="rotate(90 411 412)">3V3</text>
+<text class="pin" x="394" y="412" transform="rotate(90 394 412)">RST</text>
+<text class="pin used" x="377" y="412" transform="rotate(90 377 412)">IO4</text>
+<text class="pin used" x="360" y="412" transform="rotate(90 360 412)">IO5</text>
+<text class="pin used" x="343" y="412" transform="rotate(90 343 412)">IO6</text>
+<text class="pin used" x="326" y="412" transform="rotate(90 326 412)">IO7</text>
+<text class="pin" x="309" y="412" transform="rotate(90 309 412)">IO15</text>
+<text class="pin" x="292" y="412" transform="rotate(90 292 412)">IO16</text>
+<text class="pin used" x="275" y="412" transform="rotate(90 275 412)">IO17</text>
+<text class="pin used" x="258" y="412" transform="rotate(90 258 412)">IO18</text>
+<text class="pin used" x="241" y="412" transform="rotate(90 241 412)">IO8</text>
+<text class="pin used" x="224" y="412" transform="rotate(90 224 412)">IO3</text>
+<text class="pin" x="207" y="412" transform="rotate(90 207 412)">IO46</text>
+<text class="pin used" x="190" y="412" transform="rotate(90 190 412)">IO9</text>
+<text class="pin used" x="173" y="412" transform="rotate(90 173 412)">IO10</text>
+<text class="pin used" x="156" y="412" transform="rotate(90 156 412)">IO11</text>
+<text class="pin used" x="139" y="412" transform="rotate(90 139 412)">IO12</text>
+<text class="pin used" x="122" y="412" transform="rotate(90 122 412)">IO13</text>
+<text class="pin used" x="105" y="412" transform="rotate(90 105 412)">IO14</text>
+<text class="pin used" x="88" y="412" transform="rotate(90 88 412)">5V</text>
+<text class="pin used" x="71" y="412" transform="rotate(90 71 412)">G</text>
+</svg></div>
+    <div class="pbscroll" id="pane-bottom" hidden><svg class="pb" viewBox="0 0 931 604" width="931" height="604" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Perfboard layout, bottom view">
+<defs><pattern id="hatch-bottom" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="none"/><line x1="0" y1="0" x2="0" y2="6" stroke="#f2c14e" stroke-width="1.4" opacity=".55"/></pattern></defs>
+<rect x="22.09999999999995" y="17.25" width="890.8000000000002" height="569.5" rx="6" fill="#1d4f40" stroke="#0f3127" stroke-width="2"/>
+<rect x="362.09999999999997" y="342.79999999999995" width="107.10000000000008" height="241.4000000000001" fill="url(#hatch-bottom)" stroke="#f2c14e" stroke-dasharray="4 3" stroke-width="1" opacity=".9"/>
+<pattern id="holes-bottom" x="25.5" y="21.5" width="17" height="17" patternUnits="userSpaceOnUse"><circle cx="8.5" cy="8.5" r="4.1" fill="#c5cbd0" fill-opacity="0.9"/><circle cx="8.5" cy="8.5" r="1.7" fill="#0b1a15"/></pattern>
+<rect x="25.5" y="21.5" width="884" height="561" fill="url(#holes-bottom)"/>
+<rect x="474.29999999999995" y="394.65" width="419.9000000000001" height="171.69999999999993" rx="4" fill="none" stroke="#9fb8ae" stroke-dasharray="5 4"/>
+<rect x="467.5" y="64.0" width="195.5" height="248.20000000000005" rx="3" fill="none" stroke="#9fb8ae" stroke-dasharray="5 4"/>
+<rect x="170.0" y="36.8" width="187.0" height="190.39999999999998" rx="3" fill="none" stroke="#9fb8ae" stroke-dasharray="5 4"/>
+<rect x="731.0" y="36.8" width="153.0" height="119.00000000000001" rx="3" fill="none" stroke="#9fb8ae" stroke-dasharray="5 4"/>
+<rect x="68.0" y="431.20000000000005" width="238.0" height="115.59999999999991" rx="3" fill="none" stroke="#9fb8ae" stroke-dasharray="5 4"/>
+<g data-net="3V3" data-wire="B1"><polyline points="867.0,268.0 510.0,268.0" fill="none" stroke="#dfe3e6" stroke-width="7" stroke-linecap="round"/><polyline points="867.0,268.0 510.0,268.0" fill="none" stroke="#f08c2e" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="GND" data-wire="B2"><polyline points="867.0,336.0 544.0,336.0" fill="none" stroke="#dfe3e6" stroke-width="7" stroke-linecap="round"/><polyline points="867.0,336.0 544.0,336.0" fill="none" stroke="#15181a" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="VBAT" data-wire="B3"><polyline points="357.0,268.0 34.0,268.0" fill="none" stroke="#dfe3e6" stroke-width="7" stroke-linecap="round"/><polyline points="357.0,268.0 34.0,268.0" fill="none" stroke="#c2246b" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="PGND" data-wire="B4"><polyline points="357.0,387.0 34.0,387.0" fill="none" stroke="#dfe3e6" stroke-width="7" stroke-linecap="round"/><polyline points="357.0,387.0 34.0,387.0" fill="none" stroke="#6b4524" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="3V3" data-wire="L1"><polyline points="510.0,404.0 510.0,268.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="510.0,404.0 510.0,268.0" fill="none" stroke="#f08c2e" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="GND" data-wire="L2"><polyline points="867.0,336.0 867.0,404.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="867.0,336.0 867.0,404.0" fill="none" stroke="#15181a" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="5V" data-wire="L3"><polyline points="850.0,353.0 850.0,404.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="850.0,353.0 850.0,404.0" fill="none" stroke="#e0303f" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="3V3" data-wire="L4"><polyline points="867.0,47.0 867.0,268.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="867.0,47.0 867.0,268.0" fill="none" stroke="#f08c2e" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="3V3" data-wire="L5"><polyline points="595.0,302.0 595.0,268.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="595.0,302.0 595.0,268.0" fill="none" stroke="#f08c2e" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="3V3" data-wire="L6"><polyline points="527.0,302.0 527.0,268.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="527.0,302.0 527.0,268.0" fill="none" stroke="#f08c2e" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="GND" data-wire="L7"><polyline points="612.0,302.0 612.0,336.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="612.0,302.0 612.0,336.0" fill="none" stroke="#15181a" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="3V3" data-wire="L8"><polyline points="816.0,200.0 816.0,268.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="816.0,200.0 816.0,268.0" fill="none" stroke="#f08c2e" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="FLEX" data-wire="L9"><polyline points="799.0,200.0 799.0,217.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="799.0,200.0 799.0,217.0" fill="none" stroke="#a05bd6" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="3V3" data-wire="L10"><polyline points="731.0,200.0 731.0,268.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="731.0,200.0 731.0,268.0" fill="none" stroke="#f08c2e" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="BAT_SENSE" data-wire="L11"><polyline points="561.0,353.0 561.0,404.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="561.0,353.0 561.0,404.0" fill="none" stroke="#2fc6dc" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="SD_CS" data-wire="L_SD5"><polyline points="833.0,370.0 833.0,404.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="833.0,370.0 833.0,404.0" fill="none" stroke="#9fd3f5" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="SD_MISO" data-wire="L_SD6"><polyline points="816.0,370.0 816.0,404.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="816.0,370.0 816.0,404.0" fill="none" stroke="#9fd3f5" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="SD_SCK" data-wire="L_SD7"><polyline points="799.0,370.0 799.0,404.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="799.0,370.0 799.0,404.0" fill="none" stroke="#9fd3f5" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="SD_MOSI" data-wire="L_SD8"><polyline points="782.0,370.0 782.0,404.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="782.0,370.0 782.0,404.0" fill="none" stroke="#9fd3f5" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="VBAT" data-wire="L12"><polyline points="357.0,285.0 357.0,268.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="357.0,285.0 357.0,268.0" fill="none" stroke="#c2246b" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="BAT_SENSE" data-wire="L13"><polyline points="357.0,302.0 357.0,319.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="357.0,302.0 357.0,319.0" fill="none" stroke="#2fc6dc" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="PGND" data-wire="L14"><polyline points="357.0,336.0 357.0,387.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="357.0,336.0 357.0,387.0" fill="none" stroke="#6b4524" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="VBAT" data-wire="L15"><polyline points="340.0,285.0 340.0,268.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="340.0,285.0 340.0,268.0" fill="none" stroke="#c2246b" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="PGND" data-wire="L16"><polyline points="340.0,302.0 340.0,387.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="340.0,302.0 340.0,387.0" fill="none" stroke="#6b4524" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="M1_B" data-wire="L_B1"><polyline points="289.0,353.0 255.0,353.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="289.0,353.0 255.0,353.0" fill="none" stroke="#d9dde2" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="PGND" data-wire="L_E1"><polyline points="272.0,370.0 272.0,387.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="272.0,370.0 272.0,387.0" fill="none" stroke="#6b4524" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="PGND" data-wire="L_P1"><polyline points="255.0,370.0 255.0,387.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="255.0,370.0 255.0,387.0" fill="none" stroke="#6b4524" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="M1_NEG" data-wire="L_N1"><polyline points="238.0,319.0 272.0,319.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="238.0,319.0 272.0,319.0" fill="none" stroke="#d9dde2" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="M1_NEG" data-wire="L_C1"><polyline points="272.0,319.0 272.0,336.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="272.0,319.0 272.0,336.0" fill="none" stroke="#d9dde2" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="VBAT" data-wire="L_V1"><polyline points="238.0,302.0 238.0,268.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="238.0,302.0 238.0,268.0" fill="none" stroke="#c2246b" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="M2_B" data-wire="L_B2"><polyline points="153.0,353.0 119.0,353.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="153.0,353.0 119.0,353.0" fill="none" stroke="#d9dde2" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="PGND" data-wire="L_E2"><polyline points="136.0,370.0 136.0,387.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="136.0,370.0 136.0,387.0" fill="none" stroke="#6b4524" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="PGND" data-wire="L_P2"><polyline points="119.0,370.0 119.0,387.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="119.0,370.0 119.0,387.0" fill="none" stroke="#6b4524" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="M2_NEG" data-wire="L_N2"><polyline points="102.0,319.0 136.0,319.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="102.0,319.0 136.0,319.0" fill="none" stroke="#d9dde2" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="M2_NEG" data-wire="L_C2"><polyline points="136.0,319.0 136.0,336.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="136.0,319.0 136.0,336.0" fill="none" stroke="#d9dde2" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="VBAT" data-wire="L_V2"><polyline points="102.0,302.0 102.0,268.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="102.0,302.0 102.0,268.0" fill="none" stroke="#c2246b" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="VBAT" data-wire="L17"><polyline points="34.0,302.0 34.0,268.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="34.0,302.0 34.0,268.0" fill="none" stroke="#c2246b" stroke-width="2" stroke-linecap="round"/></g>
+<g data-net="PGND" data-wire="L18"><polyline points="34.0,319.0 34.0,387.0" fill="none" stroke="#dfe3e6" stroke-width="5.5" stroke-linecap="round"/><polyline points="34.0,319.0 34.0,387.0" fill="none" stroke="#6b4524" stroke-width="2" stroke-linecap="round"/></g>
+<circle data-net="3V3" cx="510" cy="404" r="5.2" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="3V3" cx="527" cy="404" r="5.2" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="BAT_SENSE" cx="561" cy="404" r="5.2" fill="none" stroke="#2fc6dc" stroke-width="2.4"/>
+<circle data-net="ECG_OUT" cx="578" cy="404" r="5.2" fill="none" stroke="#1fb39a" stroke-width="2.4"/>
+<circle data-net="ECG_LOP" cx="595" cy="404" r="5.2" fill="none" stroke="#7fd8c6" stroke-width="2.4"/>
+<circle data-net="ECG_LON" cx="612" cy="404" r="5.2" fill="none" stroke="#4fc3a8" stroke-width="2.4"/>
+<circle data-net="M1_CTRL" cx="663" cy="404" r="5.2" fill="none" stroke="#c9b6f2" stroke-width="2.4"/>
+<circle data-net="M2_CTRL" cx="680" cy="404" r="5.2" fill="none" stroke="#a7b4f0" stroke-width="2.4"/>
+<circle data-net="SDA" cx="697" cy="404" r="5.2" fill="none" stroke="#3d8fe0" stroke-width="2.4"/>
+<circle data-net="FLEX" cx="714" cy="404" r="5.2" fill="none" stroke="#a05bd6" stroke-width="2.4"/>
+<circle data-net="SCL" cx="748" cy="404" r="5.2" fill="none" stroke="#f2cf3a" stroke-width="2.4"/>
+<circle data-net="GSR" cx="765" cy="404" r="5.2" fill="none" stroke="#ff8fb8" stroke-width="2.4"/>
+<circle data-net="SD_MOSI" cx="782" cy="404" r="5.2" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SD_SCK" cx="799" cy="404" r="5.2" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SD_MISO" cx="816" cy="404" r="5.2" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SD_CS" cx="833" cy="404" r="5.2" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="5V" cx="850" cy="404" r="5.2" fill="none" stroke="#e0303f" stroke-width="2.4"/>
+<circle data-net="GND" cx="867" cy="404" r="5.2" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="GND" cx="510" cy="557" r="5.2" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="GND" cx="850" cy="557" r="5.2" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="GND" cx="867" cy="557" r="5.2" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="GND" cx="612" cy="302" r="5.2" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="3V3" cx="595" cy="302" r="5.2" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="ECG_OUT" cx="578" cy="302" r="5.2" fill="none" stroke="#1fb39a" stroke-width="2.4"/>
+<circle data-net="ECG_LON" cx="561" cy="302" r="5.2" fill="none" stroke="#4fc3a8" stroke-width="2.4"/>
+<circle data-net="ECG_LOP" cx="544" cy="302" r="5.2" fill="none" stroke="#7fd8c6" stroke-width="2.4"/>
+<circle data-net="3V3" cx="527" cy="302" r="5.2" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="GND" cx="289" cy="47" r="5.2" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="3V3" cx="272" cy="47" r="5.2" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="SCL" cx="255" cy="47" r="5.2" fill="none" stroke="#f2cf3a" stroke-width="2.4"/>
+<circle data-net="SDA" cx="238" cy="47" r="5.2" fill="none" stroke="#3d8fe0" stroke-width="2.4"/>
+<circle data-net="3V3" cx="867" cy="47" r="5.2" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="GND" cx="850" cy="47" r="5.2" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="SCL" cx="833" cy="47" r="5.2" fill="none" stroke="#f2cf3a" stroke-width="2.4"/>
+<circle data-net="SDA" cx="816" cy="47" r="5.2" fill="none" stroke="#3d8fe0" stroke-width="2.4"/>
+<circle data-net="GND" cx="867" cy="370" r="5.2" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="5V" cx="850" cy="370" r="5.2" fill="none" stroke="#e0303f" stroke-width="2.4"/>
+<circle data-net="SD_CS" cx="833" cy="370" r="5.2" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SD_MISO" cx="816" cy="370" r="5.2" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SD_SCK" cx="799" cy="370" r="5.2" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SD_MOSI" cx="782" cy="370" r="5.2" fill="none" stroke="#9fd3f5" stroke-width="2.4"/>
+<circle data-net="SDA" cx="442" cy="64" r="5.2" fill="none" stroke="#3d8fe0" stroke-width="2.4"/>
+<circle data-net="SCL" cx="425" cy="64" r="5.2" fill="none" stroke="#f2cf3a" stroke-width="2.4"/>
+<circle data-net="GND" cx="408" cy="64" r="5.2" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="3V3" cx="391" cy="64" r="5.2" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="3V3" cx="816" cy="200" r="5.2" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="FLEX" cx="799" cy="200" r="5.2" fill="none" stroke="#a05bd6" stroke-width="2.4"/>
+<circle data-net="GSR" cx="748" cy="200" r="5.2" fill="none" stroke="#ff8fb8" stroke-width="2.4"/>
+<circle data-net="3V3" cx="731" cy="200" r="5.2" fill="none" stroke="#f08c2e" stroke-width="2.4"/>
+<circle data-net="GND" cx="714" cy="200" r="5.2" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="238" cy="302" r="5.2" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="M1_NEG" cx="238" cy="319" r="5.2" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="102" cy="302" r="5.2" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="M2_NEG" cx="102" cy="319" r="5.2" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="34" cy="302" r="5.2" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="PGND" cx="34" cy="319" r="5.2" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="FLEX" cx="799" cy="217" r="5.2" fill="none" stroke="#a05bd6" stroke-width="2.4"/>
+<circle data-net="GND" cx="799" cy="336" r="5.2" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="GND" cx="561" cy="336" r="5.2" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="BAT_SENSE" cx="561" cy="353" r="5.2" fill="none" stroke="#2fc6dc" stroke-width="2.4"/>
+<circle data-net="5V" cx="850" cy="353" r="5.2" fill="none" stroke="#e0303f" stroke-width="2.4"/>
+<circle data-net="GND" cx="867" cy="353" r="5.2" fill="none" stroke="#15181a" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="357" cy="285" r="5.2" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="BAT_SENSE" cx="357" cy="302" r="5.2" fill="none" stroke="#2fc6dc" stroke-width="2.4"/>
+<circle data-net="BAT_SENSE" cx="357" cy="319" r="5.2" fill="none" stroke="#2fc6dc" stroke-width="2.4"/>
+<circle data-net="PGND" cx="357" cy="336" r="5.2" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="340" cy="285" r="5.2" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="PGND" cx="340" cy="302" r="5.2" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="M1_CTRL" cx="306" cy="353" r="5.2" fill="none" stroke="#c9b6f2" stroke-width="2.4"/>
+<circle data-net="M1_B" cx="289" cy="353" r="5.2" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="M1_NEG" cx="272" cy="336" r="5.2" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="M1_B" cx="272" cy="353" r="5.2" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="PGND" cx="272" cy="370" r="5.2" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="M1_B" cx="255" cy="353" r="5.2" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="PGND" cx="255" cy="370" r="5.2" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="272" cy="268" r="5.2" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="M1_NEG" cx="272" cy="319" r="5.2" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="M2_CTRL" cx="170" cy="353" r="5.2" fill="none" stroke="#a7b4f0" stroke-width="2.4"/>
+<circle data-net="M2_B" cx="153" cy="353" r="5.2" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="M2_NEG" cx="136" cy="336" r="5.2" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="M2_B" cx="136" cy="353" r="5.2" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="PGND" cx="136" cy="370" r="5.2" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="M2_B" cx="119" cy="353" r="5.2" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="PGND" cx="119" cy="370" r="5.2" fill="none" stroke="#6b4524" stroke-width="2.4"/>
+<circle data-net="VBAT" cx="136" cy="268" r="5.2" fill="none" stroke="#c2246b" stroke-width="2.4"/>
+<circle data-net="M2_NEG" cx="136" cy="319" r="5.2" fill="none" stroke="#d9dde2" stroke-width="2.4"/>
+<circle data-net="ECG_OUT" data-wire="W1" cx="578" cy="302" r="2.6" fill="#1fb39a" stroke="#000" stroke-width=".8"/>
+<circle data-net="ECG_OUT" data-wire="W1" cx="578" cy="404" r="2.6" fill="#1fb39a" stroke="#000" stroke-width=".8"/>
+<circle data-net="ECG_LOP" data-wire="W2" cx="544" cy="302" r="2.6" fill="#7fd8c6" stroke="#000" stroke-width=".8"/>
+<circle data-net="ECG_LOP" data-wire="W2" cx="595" cy="404" r="2.6" fill="#7fd8c6" stroke="#000" stroke-width=".8"/>
+<circle data-net="ECG_LON" data-wire="W3" cx="561" cy="302" r="2.6" fill="#4fc3a8" stroke="#000" stroke-width=".8"/>
+<circle data-net="ECG_LON" data-wire="W3" cx="612" cy="404" r="2.6" fill="#4fc3a8" stroke="#000" stroke-width=".8"/>
+<circle data-net="GND" data-wire="W4" cx="850" cy="47" r="2.6" fill="#15181a" stroke="#000" stroke-width=".8"/>
+<circle data-net="GND" data-wire="W4" cx="850" cy="336" r="2.6" fill="#15181a" stroke="#000" stroke-width=".8"/>
+<circle data-net="SCL" data-wire="W5" cx="833" cy="47" r="2.6" fill="#f2cf3a" stroke="#000" stroke-width=".8"/>
+<circle data-net="SCL" data-wire="W5" cx="748" cy="404" r="2.6" fill="#f2cf3a" stroke="#000" stroke-width=".8"/>
+<circle data-net="SDA" data-wire="W6" cx="816" cy="47" r="2.6" fill="#3d8fe0" stroke="#000" stroke-width=".8"/>
+<circle data-net="SDA" data-wire="W6" cx="697" cy="404" r="2.6" fill="#3d8fe0" stroke="#000" stroke-width=".8"/>
+<circle data-net="3V3" data-wire="W7" cx="867" cy="47" r="2.6" fill="#f08c2e" stroke="#000" stroke-width=".8"/>
+<circle data-net="3V3" data-wire="W7" cx="391" cy="64" r="2.6" fill="#f08c2e" stroke="#000" stroke-width=".8"/>
+<circle data-net="GND" data-wire="W8" cx="850" cy="47" r="2.6" fill="#15181a" stroke="#000" stroke-width=".8"/>
+<circle data-net="GND" data-wire="W8" cx="408" cy="64" r="2.6" fill="#15181a" stroke="#000" stroke-width=".8"/>
+<circle data-net="SCL" data-wire="W9" cx="833" cy="47" r="2.6" fill="#f2cf3a" stroke="#000" stroke-width=".8"/>
+<circle data-net="SCL" data-wire="W9" cx="425" cy="64" r="2.6" fill="#f2cf3a" stroke="#000" stroke-width=".8"/>
+<circle data-net="SDA" data-wire="W10" cx="816" cy="47" r="2.6" fill="#3d8fe0" stroke="#000" stroke-width=".8"/>
+<circle data-net="SDA" data-wire="W10" cx="442" cy="64" r="2.6" fill="#3d8fe0" stroke="#000" stroke-width=".8"/>
+<circle data-net="SDA" data-wire="W11" cx="442" cy="64" r="2.6" fill="#3d8fe0" stroke="#000" stroke-width=".8"/>
+<circle data-net="SDA" data-wire="W11" cx="238" cy="47" r="2.6" fill="#3d8fe0" stroke="#000" stroke-width=".8"/>
+<circle data-net="SCL" data-wire="W12" cx="425" cy="64" r="2.6" fill="#f2cf3a" stroke="#000" stroke-width=".8"/>
+<circle data-net="SCL" data-wire="W12" cx="255" cy="47" r="2.6" fill="#f2cf3a" stroke="#000" stroke-width=".8"/>
+<circle data-net="GND" data-wire="W13" cx="408" cy="64" r="2.6" fill="#15181a" stroke="#000" stroke-width=".8"/>
+<circle data-net="GND" data-wire="W13" cx="289" cy="47" r="2.6" fill="#15181a" stroke="#000" stroke-width=".8"/>
+<circle data-net="3V3" data-wire="W14" cx="391" cy="64" r="2.6" fill="#f08c2e" stroke="#000" stroke-width=".8"/>
+<circle data-net="3V3" data-wire="W14" cx="272" cy="47" r="2.6" fill="#f08c2e" stroke="#000" stroke-width=".8"/>
+<circle data-net="FLEX" data-wire="W15" cx="799" cy="217" r="2.6" fill="#a05bd6" stroke="#000" stroke-width=".8"/>
+<circle data-net="FLEX" data-wire="W15" cx="714" cy="404" r="2.6" fill="#a05bd6" stroke="#000" stroke-width=".8"/>
+<circle data-net="GSR" data-wire="W16" cx="748" cy="200" r="2.6" fill="#ff8fb8" stroke="#000" stroke-width=".8"/>
+<circle data-net="GSR" data-wire="W16" cx="765" cy="404" r="2.6" fill="#ff8fb8" stroke="#000" stroke-width=".8"/>
+<circle data-net="GND" data-wire="W17" cx="714" cy="200" r="2.6" fill="#15181a" stroke="#000" stroke-width=".8"/>
+<circle data-net="GND" data-wire="W17" cx="714" cy="336" r="2.6" fill="#15181a" stroke="#000" stroke-width=".8"/>
+<circle data-net="BAT_SENSE" data-wire="W18" cx="357" cy="319" r="2.6" fill="#2fc6dc" stroke="#000" stroke-width=".8"/>
+<circle data-net="BAT_SENSE" data-wire="W18" cx="561" cy="353" r="2.6" fill="#2fc6dc" stroke="#000" stroke-width=".8"/>
+<circle data-net="M1_CTRL" data-wire="W19" cx="663" cy="404" r="2.6" fill="#c9b6f2" stroke="#000" stroke-width=".8"/>
+<circle data-net="M1_CTRL" data-wire="W19" cx="306" cy="353" r="2.6" fill="#c9b6f2" stroke="#000" stroke-width=".8"/>
+<circle data-net="M2_CTRL" data-wire="W20" cx="680" cy="404" r="2.6" fill="#a7b4f0" stroke="#000" stroke-width=".8"/>
+<circle data-net="M2_CTRL" data-wire="W20" cx="170" cy="353" r="2.6" fill="#a7b4f0" stroke="#000" stroke-width=".8"/>
+<circle data-net="5V" data-wire="W21" cx="850" cy="387" r="2.6" fill="#e0303f" stroke="#000" stroke-width=".8"/>
+<circle data-net="GND" data-wire="W22" cx="867" cy="387" r="2.6" fill="#15181a" stroke="#000" stroke-width=".8"/>
+<circle data-net="VBAT" data-wire="W23" cx="34" cy="285" r="2.6" fill="#c2246b" stroke="#000" stroke-width=".8"/>
+<circle data-net="PGND" data-wire="W24" cx="68" cy="387" r="2.6" fill="#6b4524" stroke="#000" stroke-width=".8"/>
+<text class="ax" x="901" y="12" text-anchor="middle">1</text>
+<text class="ax" x="901" y="596" text-anchor="middle">1</text>
+<text class="ax" x="833" y="12" text-anchor="middle">5</text>
+<text class="ax" x="833" y="596" text-anchor="middle">5</text>
+<text class="ax" x="748" y="12" text-anchor="middle">10</text>
+<text class="ax" x="748" y="596" text-anchor="middle">10</text>
+<text class="ax" x="663" y="12" text-anchor="middle">15</text>
+<text class="ax" x="663" y="596" text-anchor="middle">15</text>
+<text class="ax" x="578" y="12" text-anchor="middle">20</text>
+<text class="ax" x="578" y="596" text-anchor="middle">20</text>
+<text class="ax" x="493" y="12" text-anchor="middle">25</text>
+<text class="ax" x="493" y="596" text-anchor="middle">25</text>
+<text class="ax" x="408" y="12" text-anchor="middle">30</text>
+<text class="ax" x="408" y="596" text-anchor="middle">30</text>
+<text class="ax" x="323" y="12" text-anchor="middle">35</text>
+<text class="ax" x="323" y="596" text-anchor="middle">35</text>
+<text class="ax" x="238" y="12" text-anchor="middle">40</text>
+<text class="ax" x="238" y="596" text-anchor="middle">40</text>
+<text class="ax" x="153" y="12" text-anchor="middle">45</text>
+<text class="ax" x="153" y="596" text-anchor="middle">45</text>
+<text class="ax" x="68" y="12" text-anchor="middle">50</text>
+<text class="ax" x="68" y="596" text-anchor="middle">50</text>
+<text class="ax" x="34" y="12" text-anchor="middle">52</text>
+<text class="ax" x="34" y="596" text-anchor="middle">52</text>
+<text class="ax" x="14" y="33.5" text-anchor="middle">1</text>
+<text class="ax" x="923" y="33.5" text-anchor="middle">1</text>
+<text class="ax" x="14" y="101.5" text-anchor="middle">5</text>
+<text class="ax" x="923" y="101.5" text-anchor="middle">5</text>
+<text class="ax" x="14" y="186.5" text-anchor="middle">10</text>
+<text class="ax" x="923" y="186.5" text-anchor="middle">10</text>
+<text class="ax" x="14" y="271.5" text-anchor="middle">15</text>
+<text class="ax" x="923" y="271.5" text-anchor="middle">15</text>
+<text class="ax" x="14" y="356.5" text-anchor="middle">20</text>
+<text class="ax" x="923" y="356.5" text-anchor="middle">20</text>
+<text class="ax" x="14" y="441.5" text-anchor="middle">25</text>
+<text class="ax" x="923" y="441.5" text-anchor="middle">25</text>
+<text class="ax" x="14" y="526.5" text-anchor="middle">30</text>
+<text class="ax" x="923" y="526.5" text-anchor="middle">30</text>
+<text class="ax" x="14" y="577.5" text-anchor="middle">33</text>
+<text class="ax" x="923" y="577.5" text-anchor="middle">33</text>
+<text class="lbl warn" x="415.65" y="489" text-anchor="middle">antenna</text><text class="lbl warn" x="415.65" y="500" text-anchor="middle">keep clear</text>
+<text class="lbl big" x="565.25" y="191.10000000000002" text-anchor="middle">AD8232 ECG</text>
+<text class="lbl big" x="263.5" y="135.0" text-anchor="middle">SSD1306 OLED</text>
+<text class="lbl big" x="807.5" y="99.30000000000001" text-anchor="middle">MPU-6050</text>
+<text class="lbl big" x="187.0" y="492.0" text-anchor="middle">MT3608 boost (set 5.0 V)</text>
+<text class="lbl" x="187.0" y="504.0" text-anchor="middle">fixed with foam tape · pads wired</text>
+<text class="lbl" x="569.5" y="294" text-anchor="middle">AD8232</text>
+<text class="lbl" x="263.5" y="39" text-anchor="middle">OLED</text>
+<text class="lbl" x="807.5" y="39" text-anchor="middle">MPU</text>
+<text class="lbl" x="824.5" y="362" text-anchor="middle">SD</text>
+<text class="lbl" x="416.5" y="56" text-anchor="middle">J5</text>
+<text class="lbl" x="807.5" y="192" text-anchor="middle">J6</text>
+<text class="lbl" x="731.0" y="192" text-anchor="middle">J7</text>
+<text class="lbl" x="238.0" y="294" text-anchor="middle">J8</text>
+<text class="lbl" x="102.0" y="294" text-anchor="middle">J9</text>
+<text class="lbl" x="34.0" y="294" text-anchor="middle">J10</text>
+<text class="lbl big" x="697" y="480.5" text-anchor="middle">DevKit headers (J1 row 23, J3 row 32)</text>
+<text class="lbl" x="697" y="499.20000000000005" text-anchor="middle">mirrored: this is the solder side</text>
+</svg></div>
+    <p class="hint">Tap a wire, a pin ring or a colour chip to show one net on its own. The bottom view is mirrored, exactly as the board looks when you flip it to solder.</p>
+  </div>
+  <div class="note">
+    <p><b>Dry-fit before you solder.</b> Module sizes vary between sellers. Plug each module into its headers, lay it on the board and check nothing collides. If you have to move a header, the wire list still holds, because it goes by pin name.</p>
+    <p><b>DevKit header spacing.</b> Genuine Espressif boards have the two header rows 9 holes apart (rows 23 and 32). Some clones are 10 apart; then put J3 on row 33, which is kept free.</p>
+  </div>
+  <h3>Where each part goes</h3>
+  <div class="tbl"><table>
+    <thead><tr><th scope="col">Ref</th><th scope="col">Part</th><th scope="col">Position</th><th scope="col">Pins (name, hole)</th></tr></thead>
+    <tbody><tr><td class="id">U1</td><td>ESP32-S3-DevKitC-1</td><td>J1 on row 23, J3 on row 32, columns 3–24 · USB-C at the left edge</td><td class="mono small">J1 from C24 (3V3, pin 1) to C3 (G, pin 22)</td></tr>
+<tr><td class="id">U3</td><td>AD8232 ECG</td><td>Row 17, columns 18–23</td><td class="mono small">GND C18 R17 · 3.3V C19 R17 · OUTPUT C20 R17 · LO− C21 R17 · LO+ C22 R17 · SDN C23 R17</td></tr>
+<tr><td class="id">U4</td><td>SSD1306 OLED</td><td>Row 2, columns 37–40</td><td class="mono small">GND C37 R2 · VCC C38 R2 · SCL C39 R2 · SDA C40 R2</td></tr>
+<tr><td class="id">U5</td><td>MPU-6050</td><td>Row 2, columns 3–10</td><td class="mono small">VCC C3 R2 · GND C4 R2 · SCL C5 R2 · SDA C6 R2 · XDA C7 R2 · XCL C8 R2 · AD0 C9 R2 · INT C10 R2</td></tr>
+<tr><td class="id">P1</td><td>SD port</td><td>Row 21, columns 3–8</td><td class="mono small">GND C3 R21 · 5V C4 R21 · CS C5 R21 · MISO C6 R21 · SCK C7 R21 · MOSI C8 R21</td></tr>
+<tr><td class="id">J5</td><td>I²C-EXT</td><td>Row 3, columns 28–31</td><td class="mono small">SDA C28 R3 · SCL C29 R3 · GND C30 R3 · 3V3 C31 R3</td></tr>
+<tr><td class="id">J6</td><td>FLEX</td><td>Row 11, columns 6–7</td><td class="mono small">3V3 C6 R11 · SIG C7 R11</td></tr>
+<tr><td class="id">J7</td><td>GSR</td><td>Row 11, columns 10–12</td><td class="mono small">SIG C10 R11 · 3V3 C11 R11 · GND C12 R11</td></tr>
+<tr><td class="id">J8</td><td>MOTOR 1</td><td>Column 40, rows 17–18</td><td class="mono small">+ C40 R17 · − C40 R18</td></tr>
+<tr><td class="id">J9</td><td>MOTOR 2</td><td>Column 48, rows 17–18</td><td class="mono small">+ C48 R17 · − C48 R18</td></tr>
+<tr><td class="id">J10</td><td>BAT IN</td><td>Column 52, rows 17–18</td><td class="mono small">+ C52 R17 · − C52 R18</td></tr>
+<tr><td class="id">R5</td><td>≈ flex flat R</td><td>Column 7, rows 12–19</td><td class="mono small">C7 R12 – C7 R19</td></tr>
+<tr><td class="id">C1</td><td>100 µF</td><td>Row 20, columns 3–4</td><td class="mono small">+ C4 R20 · − C3 R20</td></tr>
+<tr><td class="id">C3</td><td>100 nF</td><td>Column 21, rows 19–20</td><td class="mono small">C21 R19 – C21 R20</td></tr>
+<tr><td class="id">R6</td><td>100 k</td><td>Column 33, rows 16–17</td><td class="mono small">C33 R16 – C33 R17  (upright)</td></tr>
+<tr><td class="id">R7</td><td>100 k</td><td>Column 33, rows 18–19</td><td class="mono small">C33 R18 – C33 R19  (upright)</td></tr>
+<tr><td class="id">C2</td><td>100 µF</td><td>Column 34, rows 16–17</td><td class="mono small">+ C34 R16 · − C34 R17</td></tr>
+<tr><td class="id">R1</td><td>1 k</td><td>Row 20, columns 36–37</td><td class="mono small">C36 R20 – C37 R20  (upright)</td></tr>
+<tr><td class="id">R2</td><td>10 k</td><td>Column 39, rows 20–21</td><td class="mono small">C39 R20 – C39 R21  (upright)</td></tr>
+<tr><td class="id">Q1</td><td>2N2222</td><td>Column 38, rows 19–21</td><td class="mono small">C C38 R19 · B C38 R20 · E C38 R21</td></tr>
+<tr><td class="id">D1</td><td>1N4148</td><td>Column 38, rows 15–18</td><td class="mono small">K, stripe C38 R15 · A C38 R18</td></tr>
+<tr><td class="id">R3</td><td>1 k</td><td>Row 20, columns 44–45</td><td class="mono small">C44 R20 – C45 R20  (upright)</td></tr>
+<tr><td class="id">R4</td><td>10 k</td><td>Column 47, rows 20–21</td><td class="mono small">C47 R20 – C47 R21  (upright)</td></tr>
+<tr><td class="id">Q2</td><td>2N2222</td><td>Column 46, rows 19–21</td><td class="mono small">C C46 R19 · B C46 R20 · E C46 R21</td></tr>
+<tr><td class="id">D2</td><td>1N4148</td><td>Column 46, rows 15–18</td><td class="mono small">K, stripe C46 R15 · A C46 R18</td></tr>
+<tr><td class="id">U8</td><td>MT3608 boost (set 5.0 V)</td><td>C36–C50, R25–R31 · foam tape, not soldered into holes</td><td class="mono small">VOUT± at the left end, VIN± at the right end</td></tr></tbody></table></div>
+</section>
+
+<section id="parts">
+  <div class="sec-head"><div class="eyebrow">4 · Parts</div><h2>What goes on the board, what hangs off it</h2></div>
+  <h3>On the perfboard</h3>
+  <div class="tbl"><table>
+    <thead><tr><th scope="col">Ref</th><th scope="col">Part</th><th scope="col">Value / note</th><th scope="col">Qty</th><th scope="col">Source</th></tr></thead>
+    <tbody>
+      <tr><td class="id">U1</td><td>ESP32-S3-DevKitC-1-N8R8</td><td>plugs into 2 × 22 female headers</td><td>1</td><td>Robu order</td></tr>
+      <tr><td class="id">U3</td><td>AD8232 ECG module</td><td>6-pin header, jack toward the top edge</td><td>1</td><td>Robu order</td></tr>
+      <tr><td class="id">U4</td><td>SSD1306 0.96″ OLED, I²C</td><td>4-pin; check the pin order printed on yours</td><td>1</td><td>Amazon (Robocraze)</td></tr>
+      <tr><td class="id">U5</td><td>MPU-6050 (GY-521)</td><td>8-pin header, only VCC/GND/SCL/SDA wired</td><td>1</td><td>Robu order</td></tr>
+      <tr><td class="id">U8</td><td>MT3608 boost module</td><td>set to 5.0 V, foam-taped</td><td>1</td><td><span class="tag buy">buy</span></td></tr>
+      <tr><td class="id">Q1 Q2</td><td>2N2222 NPN</td><td>motor switches</td><td>2</td><td>component kit</td></tr>
+      <tr><td class="id">D1 D2</td><td>1N4148 diode</td><td>across each motor, stripe to battery +</td><td>2</td><td>component kit</td></tr>
+      <tr><td class="id">R1 R3</td><td>Resistor</td><td>1 kΩ, transistor base</td><td>2</td><td>component kit</td></tr>
+      <tr><td class="id">R2 R4</td><td>Resistor</td><td>10 kΩ, base pull-down</td><td>2</td><td>component kit</td></tr>
+      <tr><td class="id">R5</td><td>Resistor</td><td>about your flex sensor's flat resistance (22–47 kΩ)</td><td>1</td><td>component kit</td></tr>
+      <tr><td class="id">R6 R7</td><td>Resistor</td><td>100 kΩ battery divider</td><td>2</td><td>component kit</td></tr>
+      <tr><td class="id">C1 C2</td><td>Electrolytic capacitor</td><td>100 µF 16 V; stripe is −</td><td>2</td><td>Robu order / kit</td></tr>
+      <tr><td class="id">C3</td><td>Ceramic capacitor</td><td>100 nF (marked 104)</td><td>1</td><td>component kit</td></tr>
+      <tr><td class="id">P1</td><td>Male header 1 × 6</td><td>SD port (cut from a 1 × 40 strip)</td><td>1</td><td><span class="tag buy">buy</span></td></tr>
+      <tr><td class="id">J5</td><td>JST-XH socket, 4-pin</td><td>I²C-EXT for the MAX30102</td><td>1</td><td>Villcron JST kit</td></tr>
+      <tr><td class="id">J6 J8 J9 J10</td><td>JST-XH socket, 2-pin</td><td>flex, motor 1, motor 2, battery in</td><td>4</td><td>Villcron JST kit</td></tr>
+      <tr><td class="id">J7</td><td>JST-XH socket, 3-pin</td><td>GSR</td><td>1</td><td>Villcron JST kit</td></tr>
+      <tr><td class="id">—</td><td>Female header strip</td><td>62 pins: 2 × 22 DevKit, 6 AD8232, 4 OLED, 8 MPU</td><td>3 strips</td><td><span class="tag buy">buy</span></td></tr>
+      <tr><td class="id">—</td><td>Wire</td><td>tinned copper for rails and links; 22 AWG solid insulated</td><td>—</td><td><span class="tag buy">buy</span></td></tr>
+    </tbody></table></div>
+  <div class="cols">
+    <div>
+      <h3>Off the board</h3>
+      <div class="tbl"><table>
+        <thead><tr><th scope="col">Part</th><th scope="col">Where and how it connects</th></tr></thead>
+        <tbody>
+          <tr><td>LiPo 3.7 V 1500 mAh</td><td>PH2.0 plug into the TP4056</td></tr>
+          <tr><td>TP4056 Type-C</td><td>Enclosure wall, USB-C reachable. OUT+ → switch → J10 +, OUT− → J10 −</td></tr>
+          <tr><td>Power switch</td><td>Enclosure wall, in the OUT+ wire</td></tr>
+          <tr><td>2 × encapsulated motors</td><td>Shoulders, to J8 and J9. The 5 coin motors are spares.</td></tr>
+          <tr><td>Flex sensor</td><td>Elastic strap on the lower chest, to J6</td></tr>
+          <tr><td>Grove GSR + finger straps</td><td>Wrist strap. Cut the Grove cable: yellow → SIG, red → 3V3, black → GND, white unused. To J7.</td></tr>
+          <tr><td>AD8232 lead + gel pads</td><td>Jack on the module; RA, LA, RL as in Demo 1</td></tr>
+          <tr><td>microSD module</td><td>Enclosure wall with the slot reachable; 6 female–female jumpers to P1</td></tr>
+          <tr><td>MAX30102 (optional)</td><td>To J5</td></tr>
+        </tbody></table></div>
+    </div>
+    <div>
+      <h3>Buy before you start</h3>
+      <ul class="clean">
+        <li>Perfboard 9 × 15 cm, double-sided with plated holes (one spare)</li>
+        <li>MT3608 boost module (one spare)</li>
+        <li>Female header strips 1 × 40, 2.54 mm × 3, and one male strip</li>
+        <li>Mini slide or rocker switch × 2</li>
+        <li>22 AWG solid-core wire in 4–6 colours, plus tinned copper wire</li>
+        <li>Isopropyl alcohol (99 %) and an old toothbrush</li>
+        <li>microSD card, 8–32 GB, FAT32</li>
+        <li>Spare ECG gel pads</li>
+      </ul>
+      <div class="note">
+        <p><b>SD module power.</b> P1 pin 2 is 5 V, which suits modules with a small regulator on them (marked AMS1117). If yours has no regulator, take 3.3 V from J5 pin 4 instead.</p>
+        <p><b>MAX30102.</b> Some of these boards pull the I²C lines up to 1.8 V, which is too low for the ESP32. If yours has a pull-up voltage jumper, set it to 3.3 V.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="wires">
+  <div class="sec-head"><div class="eyebrow">5 · Wire list</div><h2>62 connections, ticked off as you go</h2></div>
+  <p>Work one group at a time. After each wire, beep it with the meter end to end, then tick it. Ticks stay in this browser only.</p>
+  <div class="progress"><span id="done-count">0 of 62 done</span><div class="bar" aria-hidden="true"><i id="done-bar"></i></div></div>
+  <div class="tbl wires"><table>
+    <thead><tr><th scope="col"><span class="small">Done</span></th><th scope="col">ID</th><th scope="col">Connection</th><th scope="col">Holes</th><th scope="col">Type</th></tr></thead>
+    <tbody><tr class="grp"><th colspan="5" scope="colgroup">Rails and ground <span>6</span></th></tr>
+<tr data-wire="B1" data-net="3V3"><td class="ck"><input type="checkbox" id="ck-B1" aria-label="Done: 3.3 V bus"></td><td class="id"><span class="sw" style="--sw:#f08c2e"></span>B1</td><td><label for="ck-B1">3.3 V bus</label></td><td class="mono">C3 R15 → C24 R15</td><td class="kind bus">Bare rail · bottom</td></tr>
+<tr data-wire="B2" data-net="GND"><td class="ck"><input type="checkbox" id="ck-B2" aria-label="Done: Signal GND bus"></td><td class="id"><span class="sw" style="--sw:#15181a"></span>B2</td><td><label for="ck-B2">Signal GND bus</label></td><td class="mono">C3 R19 → C22 R19</td><td class="kind bus">Bare rail · bottom</td></tr>
+<tr data-wire="B3" data-net="VBAT"><td class="ck"><input type="checkbox" id="ck-B3" aria-label="Done: Battery + rail"></td><td class="id"><span class="sw" style="--sw:#c2246b"></span>B3</td><td><label for="ck-B3">Battery + rail</label></td><td class="mono">C33 R15 → C52 R15</td><td class="kind bus">Bare rail · bottom</td></tr>
+<tr data-wire="B4" data-net="PGND"><td class="ck"><input type="checkbox" id="ck-B4" aria-label="Done: Power GND rail"></td><td class="id"><span class="sw" style="--sw:#6b4524"></span>B4</td><td><label for="ck-B4">Power GND rail</label></td><td class="mono">C33 R22 → C52 R22</td><td class="kind bus">Bare rail · bottom</td></tr>
+<tr data-wire="L1" data-net="3V3"><td class="ck"><input type="checkbox" id="ck-L1" aria-label="Done: J1-1 3V3 up to the 3.3 V bus"></td><td class="id"><span class="sw" style="--sw:#f08c2e"></span>L1</td><td><label for="ck-L1">J1-1 3V3 up to the 3.3 V bus</label></td><td class="mono">C24 R23 → C24 R15</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L2" data-net="GND"><td class="ck"><input type="checkbox" id="ck-L2" aria-label="Done: GND bus down to J1-22 G"></td><td class="id"><span class="sw" style="--sw:#15181a"></span>L2</td><td><label for="ck-L2">GND bus down to J1-22 G</label></td><td class="mono">C3 R19 → C3 R23</td><td class="kind bare">Bare link · bottom</td></tr>
+</tbody>
+<tbody><tr class="grp"><th colspan="5" scope="colgroup">Power and battery sense <span>14</span></th></tr>
+<tr data-wire="L3" data-net="5V"><td class="ck"><input type="checkbox" id="ck-L3" aria-label="Done: 5 V drop to J1-21"></td><td class="id"><span class="sw" style="--sw:#e0303f"></span>L3</td><td><label for="ck-L3">5 V drop to J1-21</label></td><td class="mono">C4 R20 → C4 R23</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L11" data-net="BAT_SENSE"><td class="ck"><input type="checkbox" id="ck-L11" aria-label="Done: C3 to J1-4 (battery sense)"></td><td class="id"><span class="sw" style="--sw:#2fc6dc"></span>L11</td><td><label for="ck-L11">C3 to J1-4 (battery sense)</label></td><td class="mono">C21 R20 → C21 R23</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L12" data-net="VBAT"><td class="ck"><input type="checkbox" id="ck-L12" aria-label="Done: R6 to battery rail"></td><td class="id"><span class="sw" style="--sw:#c2246b"></span>L12</td><td><label for="ck-L12">R6 to battery rail</label></td><td class="mono">C33 R16 → C33 R15</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L13" data-net="BAT_SENSE"><td class="ck"><input type="checkbox" id="ck-L13" aria-label="Done: R6–R7 junction"></td><td class="id"><span class="sw" style="--sw:#2fc6dc"></span>L13</td><td><label for="ck-L13">R6–R7 junction</label></td><td class="mono">C33 R17 → C33 R18</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L14" data-net="PGND"><td class="ck"><input type="checkbox" id="ck-L14" aria-label="Done: R7 to power GND rail"></td><td class="id"><span class="sw" style="--sw:#6b4524"></span>L14</td><td><label for="ck-L14">R7 to power GND rail</label></td><td class="mono">C33 R19 → C33 R22</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L15" data-net="VBAT"><td class="ck"><input type="checkbox" id="ck-L15" aria-label="Done: C2 + to battery rail"></td><td class="id"><span class="sw" style="--sw:#c2246b"></span>L15</td><td><label for="ck-L15">C2 + to battery rail</label></td><td class="mono">C34 R16 → C34 R15</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L16" data-net="PGND"><td class="ck"><input type="checkbox" id="ck-L16" aria-label="Done: C2 − to power GND rail"></td><td class="id"><span class="sw" style="--sw:#6b4524"></span>L16</td><td><label for="ck-L16">C2 − to power GND rail</label></td><td class="mono">C34 R17 → C34 R22</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L17" data-net="VBAT"><td class="ck"><input type="checkbox" id="ck-L17" aria-label="Done: J10 + to battery rail"></td><td class="id"><span class="sw" style="--sw:#c2246b"></span>L17</td><td><label for="ck-L17">J10 + to battery rail</label></td><td class="mono">C52 R17 → C52 R15</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L18" data-net="PGND"><td class="ck"><input type="checkbox" id="ck-L18" aria-label="Done: J10 − to power GND rail"></td><td class="id"><span class="sw" style="--sw:#6b4524"></span>L18</td><td><label for="ck-L18">J10 − to power GND rail</label></td><td class="mono">C52 R18 → C52 R22</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="W18" data-net="BAT_SENSE"><td class="ck"><input type="checkbox" id="ck-W18" aria-label="Done: R6/R7 junction → C3 / J1-4 IO4"></td><td class="id"><span class="sw" style="--sw:#2fc6dc"></span>W18</td><td><label for="ck-W18">R6/R7 junction → C3 / J1-4 IO4</label></td><td class="mono">C33 R18 → C21 R20</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W21" data-net="5V"><td class="ck"><input type="checkbox" id="ck-W21" aria-label="Done: MT3608 VOUT+ → 5 V drop (J1-21)"></td><td class="id"><span class="sw" style="--sw:#e0303f"></span>W21</td><td><label for="ck-W21">MT3608 VOUT+ → 5 V drop (J1-21)</label></td><td class="mono">U8 VOUT+ pad → C4 R22</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W22" data-net="GND"><td class="ck"><input type="checkbox" id="ck-W22" aria-label="Done: MT3608 VOUT− → GND drop (J1-22)"></td><td class="id"><span class="sw" style="--sw:#15181a"></span>W22</td><td><label for="ck-W22">MT3608 VOUT− → GND drop (J1-22)</label></td><td class="mono">U8 VOUT− pad → C3 R22</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W23" data-net="VBAT"><td class="ck"><input type="checkbox" id="ck-W23" aria-label="Done: MT3608 VIN+ → J10 +"></td><td class="id"><span class="sw" style="--sw:#c2246b"></span>W23</td><td><label for="ck-W23">MT3608 VIN+ → J10 +</label></td><td class="mono">U8 VIN+ pad → C52 R16</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W24" data-net="PGND"><td class="ck"><input type="checkbox" id="ck-W24" aria-label="Done: MT3608 VIN− → power GND rail"></td><td class="id"><span class="sw" style="--sw:#6b4524"></span>W24</td><td><label for="ck-W24">MT3608 VIN− → power GND rail</label></td><td class="mono">U8 VIN− pad → C50 R22</td><td class="kind wire">Insulated · top</td></tr>
+</tbody>
+<tbody><tr class="grp"><th colspan="5" scope="colgroup">ECG (AD8232) <span>6</span></th></tr>
+<tr data-wire="L5" data-net="3V3"><td class="ck"><input type="checkbox" id="ck-L5" aria-label="Done: AD8232 3.3V to bus"></td><td class="id"><span class="sw" style="--sw:#f08c2e"></span>L5</td><td><label for="ck-L5">AD8232 3.3V to bus</label></td><td class="mono">C19 R17 → C19 R15</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L6" data-net="3V3"><td class="ck"><input type="checkbox" id="ck-L6" aria-label="Done: AD8232 SDN to bus (keeps it on)"></td><td class="id"><span class="sw" style="--sw:#f08c2e"></span>L6</td><td><label for="ck-L6">AD8232 SDN to bus (keeps it on)</label></td><td class="mono">C23 R17 → C23 R15</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L7" data-net="GND"><td class="ck"><input type="checkbox" id="ck-L7" aria-label="Done: AD8232 GND to bus"></td><td class="id"><span class="sw" style="--sw:#15181a"></span>L7</td><td><label for="ck-L7">AD8232 GND to bus</label></td><td class="mono">C18 R17 → C18 R19</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="W1" data-net="ECG_OUT"><td class="ck"><input type="checkbox" id="ck-W1" aria-label="Done: AD8232 OUTPUT → J1-5 IO5"></td><td class="id"><span class="sw" style="--sw:#1fb39a"></span>W1</td><td><label for="ck-W1">AD8232 OUTPUT → J1-5 IO5</label></td><td class="mono">C20 R17 → C20 R23</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W2" data-net="ECG_LOP"><td class="ck"><input type="checkbox" id="ck-W2" aria-label="Done: AD8232 LO+ → J1-6 IO6"></td><td class="id"><span class="sw" style="--sw:#7fd8c6"></span>W2</td><td><label for="ck-W2">AD8232 LO+ → J1-6 IO6</label></td><td class="mono">C22 R17 → C19 R23</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W3" data-net="ECG_LON"><td class="ck"><input type="checkbox" id="ck-W3" aria-label="Done: AD8232 LO− → J1-7 IO7"></td><td class="id"><span class="sw" style="--sw:#4fc3a8"></span>W3</td><td><label for="ck-W3">AD8232 LO− → J1-7 IO7</label></td><td class="mono">C21 R17 → C18 R23</td><td class="kind wire">Insulated · top</td></tr>
+</tbody>
+<tbody><tr class="grp"><th colspan="5" scope="colgroup">I²C: MPU-6050, J5, OLED <span>12</span></th></tr>
+<tr data-wire="L4" data-net="3V3"><td class="ck"><input type="checkbox" id="ck-L4" aria-label="Done: MPU VCC down to the 3.3 V bus"></td><td class="id"><span class="sw" style="--sw:#f08c2e"></span>L4</td><td><label for="ck-L4">MPU VCC down to the 3.3 V bus</label></td><td class="mono">C3 R2 → C3 R15</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="W4" data-net="GND"><td class="ck"><input type="checkbox" id="ck-W4" aria-label="Done: MPU GND → GND bus"></td><td class="id"><span class="sw" style="--sw:#15181a"></span>W4</td><td><label for="ck-W4">MPU GND → GND bus</label></td><td class="mono">C4 R2 → C4 R19</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W5" data-net="SCL"><td class="ck"><input type="checkbox" id="ck-W5" aria-label="Done: MPU SCL → J1-15 IO9"></td><td class="id"><span class="sw" style="--sw:#f2cf3a"></span>W5</td><td><label for="ck-W5">MPU SCL → J1-15 IO9</label></td><td class="mono">C5 R2 → C10 R23</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W6" data-net="SDA"><td class="ck"><input type="checkbox" id="ck-W6" aria-label="Done: MPU SDA → J1-12 IO8"></td><td class="id"><span class="sw" style="--sw:#3d8fe0"></span>W6</td><td><label for="ck-W6">MPU SDA → J1-12 IO8</label></td><td class="mono">C6 R2 → C13 R23</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W7" data-net="3V3"><td class="ck"><input type="checkbox" id="ck-W7" aria-label="Done: MPU VCC → J5 3V3"></td><td class="id"><span class="sw" style="--sw:#f08c2e"></span>W7</td><td><label for="ck-W7">MPU VCC → J5 3V3</label></td><td class="mono">C3 R2 → C31 R3</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W8" data-net="GND"><td class="ck"><input type="checkbox" id="ck-W8" aria-label="Done: MPU GND → J5 GND"></td><td class="id"><span class="sw" style="--sw:#15181a"></span>W8</td><td><label for="ck-W8">MPU GND → J5 GND</label></td><td class="mono">C4 R2 → C30 R3</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W9" data-net="SCL"><td class="ck"><input type="checkbox" id="ck-W9" aria-label="Done: MPU SCL → J5 SCL"></td><td class="id"><span class="sw" style="--sw:#f2cf3a"></span>W9</td><td><label for="ck-W9">MPU SCL → J5 SCL</label></td><td class="mono">C5 R2 → C29 R3</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W10" data-net="SDA"><td class="ck"><input type="checkbox" id="ck-W10" aria-label="Done: MPU SDA → J5 SDA"></td><td class="id"><span class="sw" style="--sw:#3d8fe0"></span>W10</td><td><label for="ck-W10">MPU SDA → J5 SDA</label></td><td class="mono">C6 R2 → C28 R3</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W11" data-net="SDA"><td class="ck"><input type="checkbox" id="ck-W11" aria-label="Done: J5 SDA → OLED SDA"></td><td class="id"><span class="sw" style="--sw:#3d8fe0"></span>W11</td><td><label for="ck-W11">J5 SDA → OLED SDA</label></td><td class="mono">C28 R3 → C40 R2</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W12" data-net="SCL"><td class="ck"><input type="checkbox" id="ck-W12" aria-label="Done: J5 SCL → OLED SCL"></td><td class="id"><span class="sw" style="--sw:#f2cf3a"></span>W12</td><td><label for="ck-W12">J5 SCL → OLED SCL</label></td><td class="mono">C29 R3 → C39 R2</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W13" data-net="GND"><td class="ck"><input type="checkbox" id="ck-W13" aria-label="Done: J5 GND → OLED GND"></td><td class="id"><span class="sw" style="--sw:#15181a"></span>W13</td><td><label for="ck-W13">J5 GND → OLED GND</label></td><td class="mono">C30 R3 → C37 R2</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W14" data-net="3V3"><td class="ck"><input type="checkbox" id="ck-W14" aria-label="Done: J5 3V3 → OLED VCC"></td><td class="id"><span class="sw" style="--sw:#f08c2e"></span>W14</td><td><label for="ck-W14">J5 3V3 → OLED VCC</label></td><td class="mono">C31 R3 → C38 R2</td><td class="kind wire">Insulated · top</td></tr>
+</tbody>
+<tbody><tr class="grp"><th colspan="5" scope="colgroup">Breathing and GSR <span>6</span></th></tr>
+<tr data-wire="L8" data-net="3V3"><td class="ck"><input type="checkbox" id="ck-L8" aria-label="Done: J6 3V3 to bus"></td><td class="id"><span class="sw" style="--sw:#f08c2e"></span>L8</td><td><label for="ck-L8">J6 3V3 to bus</label></td><td class="mono">C6 R11 → C6 R15</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L9" data-net="FLEX"><td class="ck"><input type="checkbox" id="ck-L9" aria-label="Done: J6 SIG to R5"></td><td class="id"><span class="sw" style="--sw:#a05bd6"></span>L9</td><td><label for="ck-L9">J6 SIG to R5</label></td><td class="mono">C7 R11 → C7 R12</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L10" data-net="3V3"><td class="ck"><input type="checkbox" id="ck-L10" aria-label="Done: J7 3V3 to bus"></td><td class="id"><span class="sw" style="--sw:#f08c2e"></span>L10</td><td><label for="ck-L10">J7 3V3 to bus</label></td><td class="mono">C11 R11 → C11 R15</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="W15" data-net="FLEX"><td class="ck"><input type="checkbox" id="ck-W15" aria-label="Done: R5 / J6 SIG → J1-13 IO3"></td><td class="id"><span class="sw" style="--sw:#a05bd6"></span>W15</td><td><label for="ck-W15">R5 / J6 SIG → J1-13 IO3</label></td><td class="mono">C7 R12 → C12 R23</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W16" data-net="GSR"><td class="ck"><input type="checkbox" id="ck-W16" aria-label="Done: J7 SIG → J1-16 IO10"></td><td class="id"><span class="sw" style="--sw:#ff8fb8"></span>W16</td><td><label for="ck-W16">J7 SIG → J1-16 IO10</label></td><td class="mono">C10 R11 → C9 R23</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W17" data-net="GND"><td class="ck"><input type="checkbox" id="ck-W17" aria-label="Done: J7 GND → GND bus"></td><td class="id"><span class="sw" style="--sw:#15181a"></span>W17</td><td><label for="ck-W17">J7 GND → GND bus</label></td><td class="mono">C12 R11 → C12 R19</td><td class="kind wire">Insulated · top</td></tr>
+</tbody>
+<tbody><tr class="grp"><th colspan="5" scope="colgroup">Motor drivers <span>14</span></th></tr>
+<tr data-wire="L_B1" data-net="M1_B"><td class="ck"><input type="checkbox" id="ck-L_B1" aria-label="Done: Q1 base node"></td><td class="id"><span class="sw" style="--sw:#d9dde2"></span>L_B1</td><td><label for="ck-L_B1">Q1 base node</label></td><td class="mono">C37 R20 → C39 R20</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_E1" data-net="PGND"><td class="ck"><input type="checkbox" id="ck-L_E1" aria-label="Done: Q1 emitter to power GND"></td><td class="id"><span class="sw" style="--sw:#6b4524"></span>L_E1</td><td><label for="ck-L_E1">Q1 emitter to power GND</label></td><td class="mono">C38 R21 → C38 R22</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_P1" data-net="PGND"><td class="ck"><input type="checkbox" id="ck-L_P1" aria-label="Done: R2 to power GND"></td><td class="id"><span class="sw" style="--sw:#6b4524"></span>L_P1</td><td><label for="ck-L_P1">R2 to power GND</label></td><td class="mono">C39 R21 → C39 R22</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_N1" data-net="M1_NEG"><td class="ck"><input type="checkbox" id="ck-L_N1" aria-label="Done: Motor 1 − to D1 anode"></td><td class="id"><span class="sw" style="--sw:#d9dde2"></span>L_N1</td><td><label for="ck-L_N1">Motor 1 − to D1 anode</label></td><td class="mono">C40 R18 → C38 R18</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_C1" data-net="M1_NEG"><td class="ck"><input type="checkbox" id="ck-L_C1" aria-label="Done: D1 anode to Q1 collector"></td><td class="id"><span class="sw" style="--sw:#d9dde2"></span>L_C1</td><td><label for="ck-L_C1">D1 anode to Q1 collector</label></td><td class="mono">C38 R18 → C38 R19</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_V1" data-net="VBAT"><td class="ck"><input type="checkbox" id="ck-L_V1" aria-label="Done: Motor 1 + to battery rail"></td><td class="id"><span class="sw" style="--sw:#c2246b"></span>L_V1</td><td><label for="ck-L_V1">Motor 1 + to battery rail</label></td><td class="mono">C40 R17 → C40 R15</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_B2" data-net="M2_B"><td class="ck"><input type="checkbox" id="ck-L_B2" aria-label="Done: Q2 base node"></td><td class="id"><span class="sw" style="--sw:#d9dde2"></span>L_B2</td><td><label for="ck-L_B2">Q2 base node</label></td><td class="mono">C45 R20 → C47 R20</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_E2" data-net="PGND"><td class="ck"><input type="checkbox" id="ck-L_E2" aria-label="Done: Q2 emitter to power GND"></td><td class="id"><span class="sw" style="--sw:#6b4524"></span>L_E2</td><td><label for="ck-L_E2">Q2 emitter to power GND</label></td><td class="mono">C46 R21 → C46 R22</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_P2" data-net="PGND"><td class="ck"><input type="checkbox" id="ck-L_P2" aria-label="Done: R4 to power GND"></td><td class="id"><span class="sw" style="--sw:#6b4524"></span>L_P2</td><td><label for="ck-L_P2">R4 to power GND</label></td><td class="mono">C47 R21 → C47 R22</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_N2" data-net="M2_NEG"><td class="ck"><input type="checkbox" id="ck-L_N2" aria-label="Done: Motor 2 − to D2 anode"></td><td class="id"><span class="sw" style="--sw:#d9dde2"></span>L_N2</td><td><label for="ck-L_N2">Motor 2 − to D2 anode</label></td><td class="mono">C48 R18 → C46 R18</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_C2" data-net="M2_NEG"><td class="ck"><input type="checkbox" id="ck-L_C2" aria-label="Done: D2 anode to Q2 collector"></td><td class="id"><span class="sw" style="--sw:#d9dde2"></span>L_C2</td><td><label for="ck-L_C2">D2 anode to Q2 collector</label></td><td class="mono">C46 R18 → C46 R19</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_V2" data-net="VBAT"><td class="ck"><input type="checkbox" id="ck-L_V2" aria-label="Done: Motor 2 + to battery rail"></td><td class="id"><span class="sw" style="--sw:#c2246b"></span>L_V2</td><td><label for="ck-L_V2">Motor 2 + to battery rail</label></td><td class="mono">C48 R17 → C48 R15</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="W19" data-net="M1_CTRL"><td class="ck"><input type="checkbox" id="ck-W19" aria-label="Done: J1-10 IO17 → R1"></td><td class="id"><span class="sw" style="--sw:#c9b6f2"></span>W19</td><td><label for="ck-W19">J1-10 IO17 → R1</label></td><td class="mono">C15 R23 → C36 R20</td><td class="kind wire">Insulated · top</td></tr>
+<tr data-wire="W20" data-net="M2_CTRL"><td class="ck"><input type="checkbox" id="ck-W20" aria-label="Done: J1-11 IO18 → R3"></td><td class="id"><span class="sw" style="--sw:#a7b4f0"></span>W20</td><td><label for="ck-W20">J1-11 IO18 → R3</label></td><td class="mono">C14 R23 → C44 R20</td><td class="kind wire">Insulated · top</td></tr>
+</tbody>
+<tbody><tr class="grp"><th colspan="5" scope="colgroup">SD port <span>4</span></th></tr>
+<tr data-wire="L_SD5" data-net="SD_CS"><td class="ck"><input type="checkbox" id="ck-L_SD5" aria-label="Done: P1 CS to J1"></td><td class="id"><span class="sw" style="--sw:#9fd3f5"></span>L_SD5</td><td><label for="ck-L_SD5">P1 CS to J1</label></td><td class="mono">C5 R21 → C5 R23</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_SD6" data-net="SD_MISO"><td class="ck"><input type="checkbox" id="ck-L_SD6" aria-label="Done: P1 MISO to J1"></td><td class="id"><span class="sw" style="--sw:#9fd3f5"></span>L_SD6</td><td><label for="ck-L_SD6">P1 MISO to J1</label></td><td class="mono">C6 R21 → C6 R23</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_SD7" data-net="SD_SCK"><td class="ck"><input type="checkbox" id="ck-L_SD7" aria-label="Done: P1 SCK to J1"></td><td class="id"><span class="sw" style="--sw:#9fd3f5"></span>L_SD7</td><td><label for="ck-L_SD7">P1 SCK to J1</label></td><td class="mono">C7 R21 → C7 R23</td><td class="kind bare">Bare link · bottom</td></tr>
+<tr data-wire="L_SD8" data-net="SD_MOSI"><td class="ck"><input type="checkbox" id="ck-L_SD8" aria-label="Done: P1 MOSI to J1"></td><td class="id"><span class="sw" style="--sw:#9fd3f5"></span>L_SD8</td><td><label for="ck-L_SD8">P1 MOSI to J1</label></td><td class="mono">C8 R21 → C8 R23</td><td class="kind bare">Bare link · bottom</td></tr>
+</tbody>
+  </table></div>
+  <p class="muted small">Insulated wire ends go through the hole next to the target pad and are soldered to that pad underneath. Use red for 5 V and battery +, black for every ground, any other colour for signals.</p>
+</section>
+
+<section id="breadboard">
+  <div class="sec-head"><div class="eyebrow">6 · Phase 2</div><h2>Breadboard tests, one block at a time</h2></div>
+  <p>Use the pin map above on the breadboard, so the perfboard is a copy of something that already works. Add one block, pass its check, then add the next.</p>
+  <div>
+    <div class="test"><div class="n">B0</div><h3>Move motor 1 to IO17</h3><p>Move the transistor's base wire from IO4 to IO17 and set <code>PIN_MOTOR1 17</code>.</p><p class="pass"><b>Pass</b>Typing <code>t</code> still buzzes the motor and the ECG still reads.</p></div>
+    <div class="test"><div class="n">B1</div><h3>Power chain on the bench</h3><p>Check the battery plug's red wire goes to the TP4056's B+. Wire OUT+ → switch → MT3608 VIN+, OUT− → VIN−. Nothing else connected.</p><p class="pass"><b>Pass</b>OUT+ reads 3.0–4.2 V. Turn the MT3608 screw until VOUT reads 4.95–5.05 V. Switch off.</p></div>
+    <div class="test"><div class="n">B2</div><h3>DevKit on battery</h3><p>USB unplugged. MT3608 VOUT+ → DevKit 5V, VOUT− → G. Switch on.</p><p class="pass"><b>Pass</b>It boots, the 3V3 pin reads 3.25–3.35 V, the Wi-Fi dashboard works, and 10 minutes of motor tests cause no reset.</p></div>
+    <div class="test"><div class="n">B3</div><h3>Battery sense</h3><p>100 kΩ from battery + to IO4, 100 kΩ from IO4 to GND, 100 nF from IO4 to GND.</p><p class="pass"><b>Pass</b>The reading × 2 matches the meter on the battery within 0.05 V.</p></div>
+    <div class="test"><div class="n">B4</div><h3>MPU-6050</h3><p>VCC → 3V3, GND → GND, SCL → IO9, SDA → IO8, sharing the bus with the OLED.</p><p class="pass"><b>Pass</b>An I²C scan lists <code>0x3C</code> and <code>0x68</code>, and tilting the board changes the accelerometer values.</p></div>
+    <div class="test"><div class="n">B5</div><h3>Breathing (flex sensor)</h3><p>Measure the flex sensor lying flat and pick R5 close to that value. Flex sensor from 3V3 to IO3, R5 from IO3 to GND. Strap it across the lower chest.</p><p class="pass"><b>Pass</b>The Serial Plotter shows a slow wave that follows your breathing, about 12–20 cycles a minute at rest.</p></div>
+    <div class="test"><div class="n">B6</div><h3>GSR</h3><p>Grove red → 3V3, black → GND, yellow → IO10. With the finger straps off, set the module's trimmer so the reading sits mid-scale.</p><p class="pass"><b>Pass</b>The reading changes when you put the straps on, and drifts slowly after a deep breath or a sudden noise.</p></div>
+    <div class="test"><div class="n">B7</div><h3>Motor 2</h3><p>A second 2N2222 stage (1 kΩ, 10 kΩ, 1N4148) on IO18, motor + to battery +.</p><p class="pass"><b>Pass</b>Each motor buzzes on its own command, and both stay still while the board boots.</p></div>
+    <div class="test"><div class="n">B8</div><h3>SD card</h3><p>Module on IO11–IO14 as in the pin map; card formatted FAT32.</p><p class="pass"><b>Pass</b>Firmware writes a test file and reads it back.</p></div>
+    <div class="test"><div class="n">B9</div><h3>Full run on battery</h3><p>All sensors, laptop and phone paired, DANGER fired every minute, logging to SD, pads on.</p><p class="pass"><b>Pass</b>30 minutes with no reset and a clean ECG trace while the motors run. Note the battery voltage drop to estimate runtime.</p></div>
+  </div>
+</section>
+
+<section id="solder">
+  <div class="sec-head"><div class="eyebrow">7 · Phase 3</div><h2>Soldering the perfboard</h2></div>
+  <div class="cols">
+    <div>
+      <h3>Tools and settings</h3>
+      <ul class="clean">
+        <li>Iron at 350–380 °C if it's adjustable; your 22 SWG solder is lead-free and needs the heat. A fixed iron needs 3–5 minutes to warm up.</li>
+        <li>Tin the tip and keep it shiny: wipe, then add a touch of solder.</li>
+        <li>Flux paste: a thin smear on the pads only.</li>
+        <li>Open window, eye protection, iron always back in its stand.</li>
+        <li>Battery unplugged whenever the iron is on.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>A good joint</h3>
+      <ol class="steps">
+        <li>Touch the tip to the pad and the pin together for about a second.</li>
+        <li>Feed solder into the joint on the far side of the pin, not onto the tip.</li>
+        <li>Stop once it flows into a small cone; 1–2 mm of wire is enough for a header pin.</li>
+        <li>Take the solder away, then the iron. The whole joint takes under 3 seconds.</li>
+        <li>Hold still for 2 seconds. Lead-free joints look satin, not mirror-bright.</li>
+      </ol>
+      <p class="muted small">A ball sitting on the pad means the pad was too cold; reheat with flux. A bridge between pads comes off by dragging a fluxed tip between them.</p>
+    </div>
+  </div>
+  <div class="cols">
+    <div>
+      <h3>Perfboard techniques</h3>
+      <ul class="clean">
+        <li><b>Rails and bare links</b> (dashed): tinned wire or resistor-leg offcuts laid flat along the holes on the bottom, soldered at every hole. Pull the wire to straighten it first.</li>
+        <li><b>Insulated wires</b> (solid): strip 3 mm, push through the hole next to the target pad from the top, bend onto the pad underneath, solder. Keep them flat.</li>
+        <li><b>Upright resistors</b> (R1–R4, R6, R7): bend one lead back along the body so both leads drop into neighbouring holes.</li>
+        <li><b>JST sockets</b>: use the XH sockets (2.5 mm pitch) on the board. PH sockets (2.0 mm) don't line up with 2.54 mm holes. If a kit pair has wire on both halves, solder one pigtail into the board and hot-glue it.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Build order</h3>
+      <ol class="steps">
+        <li>Dry-fit every module and mark the header holes with a marker. Cut the board down if it's bigger than your enclosure.</li>
+        <li>Plug two 1 × 22 female strips onto the DevKit, stand it on rows 23 and 32, tack the four corner pins, lift the DevKit off, solder the rest.</li>
+        <li>Remaining headers and sockets: AD8232, OLED, MPU, P1, J5–J10.</li>
+        <li>Rails: 3.3 V (row 15, left), signal GND (row 19), battery (row 15, right), power GND (row 22, right).</li>
+        <li>Low parts: diodes, resistors, C3, transistors, then C1 and C2. Copy the transistor's E-B-C order from your working breadboard: a PN2222A reads E-B-C with the flat face toward you, a P2N2222A reads C-B-E.</li>
+        <li>Bare links, then insulated wires group by group, beeping and ticking each one.</li>
+        <li>MT3608, already set to 5.0 V: foam-tape it down and wire its four pads.</li>
+        <li>Scrub off flux with alcohol and a toothbrush, then check every joint through a zoomed phone camera.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="cols">
+    <div>
+      <h3>First power-on</h3>
+      <ol class="steps">
+        <li>No modules plugged in. Beep 5V–GND, 3V3–GND and battery+–GND: none may beep steadily. A short chirp is the capacitors charging.</li>
+        <li>Battery in, switch on: 5.0 V at C4 R23 and 3.0–4.2 V on the battery rail. Switch off.</li>
+        <li>DevKit only, USB unplugged. Switch on: it boots and the 3.3 V bus reads 3.25–3.35 V.</li>
+        <li>Add modules one at a time, rerunning the matching test (B3–B8) after each.</li>
+        <li>Finish with B9, with the board in the pouch.</li>
+      </ol>
+    </div>
+    <div class="warn">
+      <h3>Safety</h3>
+      <ul class="clean">
+        <li>Check the LiPo plug polarity before every new connection; plug colours aren't standard.</li>
+        <li>Never short or puncture the LiPo. Charge on a non-flammable surface, not unattended. Stop using it if it swells or gets hot.</li>
+        <li>Electrodes on a person only while running from the battery, never while charging or plugged into a laptop on its charger.</li>
+        <li>ArogyaAegis is a research prototype, not a medical device.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="wearable">
+  <div class="sec-head"><div class="eyebrow">8 · Wearable</div><h2>Mounting it in a vest</h2></div>
+  <p>The board, battery and charger ride in one pouch on the wearer's left side. Each sensor sits where its signal is strongest and reaches the pouch on its own flexible lead with a JST plug, so the electronics lift out before washing.</p>
+  <figure class="bodymap">
+    <div class="scroll"><svg viewBox="0 0 900 480" role="img" aria-label="Front and back of the vest: ECG pads on the upper chest and lower right ribs, breathing band across the lower chest, GSR straps on the left hand, motors on both shoulders at the back, and one electronics pouch on the left side that every cable runs to. The ECG lead stays on the front, the motor leads on the back." xmlns="http://www.w3.org/2000/svg">
+<text class="hd" x="225" y="20" text-anchor="middle">FRONT</text>
+<polyline points="121,112 109,230 103,335" fill="none" stroke="var(--body)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="101" cy="352" r="13" fill="var(--body)"/>
+<polyline points="329,112 341,230 347,335" fill="none" stroke="var(--body)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="349" cy="352" r="13" fill="var(--body)"/>
+<rect x="213" y="64" width="24" height="24" fill="var(--body)"/>
+<circle cx="225" cy="50" r="24" fill="var(--body)"/>
+<path d="M179,82 L127,98 Q115,104 119,124 L125,200 Q117,320 129,420 L321,420 Q333,320 325,200 L331,124 Q335,104 323,98 L271,82 Q225,128 179,82 Z" fill="var(--panel)" stroke="currentColor" stroke-width="1.6"/>
+<rect x="123" y="236" width="204" height="16" rx="3" fill="#a05bd6" fill-opacity=".18" stroke="#a05bd6" stroke-width="1.4"/>
+<rect x="189" y="240" width="60" height="8" rx="2" fill="#a05bd6"/>
+<rect x="295" y="298" width="42" height="64" rx="6" fill="var(--accent)" fill-opacity=".2" stroke="var(--accent)" stroke-width="2"/>
+<path d="M179,136 L225,190 M271,136 L225,190 M165,300 L225,290 M225,190 V290 L295,318" fill="none" stroke="#1fb39a" stroke-width="2.2" stroke-dasharray="6 4" stroke-linecap="round"/>
+<path d="M249,244 H311 V298" fill="none" stroke="#a05bd6" stroke-width="2.2" stroke-dasharray="6 4" stroke-linecap="round"/>
+<path d="M345,318 L337,330" fill="none" stroke="#e0629a" stroke-width="2.2" stroke-dasharray="4 3" stroke-linecap="round"/>
+<circle cx="179" cy="136" r="8" fill="#1fb39a" stroke="var(--paper)" stroke-width="2"/>
+<circle cx="271" cy="136" r="8" fill="#1fb39a" stroke="var(--paper)" stroke-width="2"/>
+<circle cx="165" cy="300" r="8" fill="#1fb39a" stroke="var(--paper)" stroke-width="2"/>
+<circle cx="349" cy="352" r="16" fill="none" stroke="#e0629a" stroke-width="2.4"/>
+<rect x="337" y="308" width="22" height="13" rx="3" fill="#e0629a"/>
+<text class="lb" x="12" y="140" text-anchor="start">RA pad</text>
+<line x1="58" y1="136" x2="169" y2="136" stroke="currentColor" stroke-width=".9" opacity=".55"/>
+<text class="lb" x="12" y="238" text-anchor="start">Breathing</text>
+<text class="lb" x="12" y="252" text-anchor="start">band</text>
+<line x1="70" y1="244" x2="123" y2="244" stroke="currentColor" stroke-width=".9" opacity=".55"/>
+<text class="lb" x="12" y="304" text-anchor="start">RL pad</text>
+<line x1="56" y1="300" x2="155" y2="300" stroke="currentColor" stroke-width=".9" opacity=".55"/>
+<text class="rt" x="231" y="214" text-anchor="start">ECG lead, inside</text>
+<text class="lb" x="438" y="140" text-anchor="end">LA pad</text>
+<line x1="392" y1="136" x2="281" y2="136" stroke="currentColor" stroke-width=".9" opacity=".55"/>
+<text class="lb" x="438" y="322" text-anchor="end">Pouch</text>
+<text class="sub" x="438" y="336" text-anchor="end">left side</text>
+<line x1="398" y1="318" x2="337" y2="322" stroke="currentColor" stroke-width=".9" opacity=".55"/>
+<text class="lb" x="438" y="380" text-anchor="end">GSR straps</text>
+<line x1="370" y1="376" x2="363" y2="360" stroke="currentColor" stroke-width=".9" opacity=".55"/>
+<text class="sub" x="120" y="466" text-anchor="middle">wearer's right</text>
+<text class="sub" x="330" y="466" text-anchor="middle">wearer's left</text>
+<text class="hd" x="675" y="20" text-anchor="middle">BACK</text>
+<polyline points="571,112 559,230 553,335" fill="none" stroke="var(--body)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="551" cy="352" r="13" fill="var(--body)"/>
+<polyline points="779,112 791,230 797,335" fill="none" stroke="var(--body)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="799" cy="352" r="13" fill="var(--body)"/>
+<rect x="663" y="64" width="24" height="24" fill="var(--body)"/>
+<circle cx="675" cy="50" r="24" fill="var(--body)"/>
+<path d="M629,82 L577,98 Q565,104 569,124 L575,200 Q567,320 579,420 L771,420 Q783,320 775,200 L781,124 Q785,104 773,98 L721,82 Q675,96 629,82 Z" fill="var(--panel)" stroke="currentColor" stroke-width="1.6"/>
+<line x1="675" y1="104" x2="675" y2="410" stroke="var(--rule)" stroke-dasharray="3 5"/>
+<rect x="563" y="298" width="42" height="64" rx="6" fill="var(--accent)" fill-opacity=".2" stroke="var(--accent)" stroke-width="2"/>
+<path d="M625,126 Q615,220 597,298" fill="none" stroke="#c2246b" stroke-width="2.2" stroke-dasharray="6 4" stroke-linecap="round"/>
+<path d="M725,126 C711,210 645,236 603,306" fill="none" stroke="#c2246b" stroke-width="2.2" stroke-dasharray="6 4" stroke-linecap="round"/>
+<rect x="613" y="110" width="24" height="15" rx="4" fill="#c2246b" stroke="var(--paper)" stroke-width="1.5"/>
+<rect x="713" y="110" width="24" height="15" rx="4" fill="#c2246b" stroke="var(--paper)" stroke-width="1.5"/>
+<text class="lb" x="462" y="122" text-anchor="start">Motor 1</text>
+<line x1="512" y1="118" x2="613" y2="118" stroke="currentColor" stroke-width=".9" opacity=".55"/>
+<text class="lb" x="462" y="334" text-anchor="start">Pouch</text>
+<line x1="500" y1="330" x2="563" y2="330" stroke="currentColor" stroke-width=".9" opacity=".55"/>
+<text class="lb" x="888" y="122" text-anchor="end">Motor 2</text>
+<line x1="840" y1="118" x2="737" y2="118" stroke="currentColor" stroke-width=".9" opacity=".55"/>
+<text class="rt" x="679" y="238" text-anchor="start">motor leads stay</text>
+<text class="rt" x="679" y="252" text-anchor="start">on the back</text>
+<text class="sub" x="570" y="466" text-anchor="middle">wearer's left</text>
+<text class="sub" x="780" y="466" text-anchor="middle">wearer's right</text>
+</svg></div>
+    <figcaption>Every cable runs to the pouch. The ECG lead stays on the front and the motor leads stay on the back, so motor noise never travels next to the ECG.</figcaption>
+  </figure>
+  <h3>Where each part goes on the body</h3>
+  <div class="tbl"><table>
+    <thead><tr><th scope="col">Part</th><th scope="col">Position</th><th scope="col">Held by</th><th scope="col">Lead to the pouch</th></tr></thead>
+    <tbody>
+      <tr><td>Pouch: board, battery, TP4056, switch</td><td>Left side at the waist, over soft tissue, above the hip bone</td><td>Zip pouch sewn to the vest; enclosure inside on foam</td><td>USB-C port and switch reachable through a slot; OLED behind a clear window</td></tr>
+      <tr><td>ECG pads RA, LA, RL</td><td>RA and LA just below the collarbones, RL on the lower right ribs</td><td>Gel pads on skin, under the vest</td><td>AD8232 3-lead cable inside the vest, down the front, out through a small slit next to the pouch</td></tr>
+      <tr><td>Flex sensor (breathing)</td><td>Front of an elastic band around the lower chest, just under the chest muscles</td><td>Fabric sleeve sewn on the band; base end stitched still, tip free to slide</td><td>2 wires along the band to the side, into J6</td></tr>
+      <tr><td>GSR straps and Grove module</td><td>Index and middle finger of the left hand (the non-dominant hand); module on a wristband</td><td>The straps' own Velcro; module in a small pocket on the wristband</td><td>Grove cable extended with silicone wire, up the left side, into J7</td></tr>
+      <tr><td>Motor 1 and motor 2</td><td>Upper back, one on top of each shoulder blade</td><td>Small sewn pockets, motor face against the body</td><td>Twisted pairs down the back into J8 and J9</td></tr>
+      <tr><td>MPU-6050</td><td>On the board in the pouch</td><td>—</td><td>For cleaner motion data, move it to the upper chest on a 4-wire lead into J5</td></tr>
+      <tr><td>MAX30102 (optional)</td><td>Right index fingertip</td><td>Finger strap</td><td>4-wire lead into J5</td></tr>
+    </tbody></table></div>
+  <div class="cols">
+    <div>
+      <h3>Cable rules</h3>
+      <ul class="clean">
+        <li><b>Silicone stranded wire</b> (24–26 AWG) for every lead off the board. Solid-core wire snaps after repeated bending, so it stays on the perfboard.</li>
+        <li><b>A JST plug at the pouch end of every lead</b>, labelled M1, M2, FLEX, GSR, so the pouch unplugs in seconds.</li>
+        <li><b>Strain relief at both ends</b>: heat-shrink over each solder joint, then stitch or tie the wire to the fabric 2–3 cm away, so a tug pulls on the fabric and not the joint.</li>
+        <li><b>Slack across joints</b>: leave a 3–5 cm loop at the shoulder, waist and wrist.</li>
+        <li><b>Hold leads in sewn channels</b> (bias tape) or elastic loops every 8–10 cm. Adhesive alone won't stay on stretchy fabric.</li>
+        <li><b>Twist each motor's two wires together</b> and keep them on the back, at least 10 cm from the ECG lead.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Building the vest</h3>
+      <ol class="steps">
+        <li>Put the vest on and mark the pad spots, band height, pouch and motor spots with tailor's chalk. Try everything with safety pins before sewing.</li>
+        <li>Sew the pouch (or two strips of sew-on Velcro) on the left side, and cut a 1 cm slit beside it for leads to pass inside.</li>
+        <li>Sew two small pockets on the upper back for the motors, open at the top.</li>
+        <li>Make the breathing band: 3–4 cm elastic, a little shorter than your chest, Velcro closure, flex sleeve sewn at the front.</li>
+        <li>Sew cable channels down the front (ECG), along the band (flex), down the back (motors) and down the left side (GSR).</li>
+        <li>Where you use your self-adhesive Velcro, add a stitch at each corner; the adhesive peels off stretchy fabric.</li>
+        <li>Make the leads: silicone wire, XH plug at the board end, heat-shrink at both ends.</li>
+        <li>Fit the enclosure: slots for the TP4056's USB-C and the switch, a window for the OLED, battery taped in clear of sharp edges.</li>
+        <li>Rerun test B9 while walking, sitting and bending, and re-route any lead that pulls.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="cols">
+    <div>
+      <h3>Putting it on</h3>
+      <ol class="steps">
+        <li>Switch off. Wipe the three pad spots with an alcohol swab and let them dry.</li>
+        <li>Stick on fresh gel pads and snap the leads by the letters on the clips.</li>
+        <li>Put the vest on; feed the ECG lead down inside and out through the slit.</li>
+        <li>Fasten the band snug enough to stay put while two fingers still slide under it.</li>
+        <li>Put on the finger straps and wristband.</li>
+        <li>Plug in every lead and the ECG jack, switch on, and wait for "Paired" on the dashboards.</li>
+        <li>Check BPM, the breathing wave and the GSR value, then type <code>t</code> to test the motors.</li>
+      </ol>
+      <p class="muted small">To take it off: switch off, unplug the leads, lift the pouch out, peel the pads.</p>
+    </div>
+    <div class="warn">
+      <h3>Comfort, washing and safety</h3>
+      <ul class="clean">
+        <li>No hard part over a bone. Round off the enclosure corners and keep the pouch on the soft flank.</li>
+        <li>The battery stays inside the enclosure, never against skin. After 30 minutes the pouch should not feel warm.</li>
+        <li>Electrodes only while running from the battery: never while charging, never while USB goes to a laptop on its charger.</li>
+        <li>Before washing, remove the pouch and unplug every lead. Wipe the flex sensor and GSR straps; never soak them. Hand-wash the vest cold and air-dry it.</li>
+        <li>Gel pads are single use.</li>
+        <li>Testing on other people needs your department's approval and their consent, as the project report sets out.</li>
+      </ul>
+    </div>
+  </div>
+  <h3>Buy for the vest</h3>
+  <ul class="clean">
+    <li>Snug compression vest with a front zip (or a fitted sports compression T-shirt), polyester-elastane</li>
+    <li>Zip pouch sized to your enclosure, about 16 × 10 × 4 cm for the 9 × 15 cm board</li>
+    <li>Elastic band 3–4 cm wide (1 m) and 25 mm sew-on Velcro</li>
+    <li>Silicone stranded wire 24–26 AWG in 3–4 colours (5 m)</li>
+    <li>Bias tape or elastic for cable channels, felt scraps for pockets, needle, polyester thread, tailor's chalk, safety pins</li>
+    <li>Alcohol swabs, and a scrap of clear PVC for the OLED window</li>
+  </ul>
+</section>
+
+<footer>
+  <div>Layout checked by script: 22 nets, 38 bare runs and 24 insulated wires; every net joined end to end, no shorts, no wire landing on the wrong net.</div>
+  <div>ArogyaAegis · Phase 2 and 3 perfboard and vest plan · 20 Oct 2026</div>
+</footer>
+</div>
+
+<script>
+(function(){
+  var viewer=document.getElementById('viewer');
+  var bTop=document.getElementById('v-top'), bBot=document.getElementById('v-bottom');
+  var pTop=document.getElementById('pane-top'), pBot=document.getElementById('pane-bottom');
+  var clearBtn=document.getElementById('clear');
+  function setView(bottom){
+    pTop.hidden=bottom; pBot.hidden=!bottom;
+    bTop.setAttribute('aria-pressed',String(!bottom)); bBot.setAttribute('aria-pressed',String(bottom));
+  }
+  bTop.addEventListener('click',function(){setView(false)});
+  bBot.addEventListener('click',function(){setView(true)});
+  var active=null;
+  function focusNet(net){
+    active=(net===active)?null:net;
+    viewer.classList.toggle('focus',!!active);
+    viewer.querySelectorAll('.pb [data-net]').forEach(function(el){el.classList.toggle('hl',el.getAttribute('data-net')===active)});
+    document.querySelectorAll('#legend .chip').forEach(function(c){c.setAttribute('aria-pressed',String(c.getAttribute('data-net')===active))});
+    clearBtn.hidden=!active;
+  }
+  document.getElementById('legend').addEventListener('click',function(ev){
+    var c=ev.target.closest('.chip'); if(c) focusNet(c.getAttribute('data-net'));
+  });
+  viewer.addEventListener('click',function(ev){
+    var el=ev.target.closest('.pb [data-net]'); if(el) focusNet(el.getAttribute('data-net'));
+  });
+  clearBtn.addEventListener('click',function(){active=null;focusNet(null)});
+  // wire list hover -> highlight net on the board
+  document.querySelectorAll('.wires tr[data-wire]').forEach(function(tr){
+    tr.addEventListener('mouseenter',function(){
+      if(active) return;
+      var n=tr.getAttribute('data-net');
+      viewer.classList.add('focus');
+      viewer.querySelectorAll('.pb [data-net]').forEach(function(el){el.classList.toggle('hl',el.getAttribute('data-net')===n)});
+    });
+    tr.addEventListener('mouseleave',function(){
+      if(active) return;
+      viewer.classList.remove('focus');
+      viewer.querySelectorAll('.pb .hl').forEach(function(el){el.classList.remove('hl')});
+    });
+  });
+  // tick list, kept per viewer
+  var KEY='arogyaaegis-perfboard-done', done={};
+  try{ done=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ done={}; }
+  var boxes=document.querySelectorAll('.wires input[type=checkbox]');
+  var total=boxes.length;
+  function refresh(){
+    var n=0;
+    boxes.forEach(function(b){ var on=!!done[b.id]; b.checked=on; b.closest('tr').classList.toggle('done',on); if(on) n++; });
+    document.getElementById('done-count').textContent=n+' of '+total+' done';
+    document.getElementById('done-bar').style.width=(100*n/total)+'%';
+  }
+  boxes.forEach(function(b){ b.addEventListener('change',function(){
+    if(b.checked) done[b.id]=1; else delete done[b.id];
+    try{ localStorage.setItem(KEY,JSON.stringify(done)); }catch(e){}
+    refresh();
+  });});
+  refresh();
+})();
+</script>
+</body>
+</html>

@@ -6,6 +6,10 @@ tell **stress from exercise**, **guide the wearer's breathing**, **run all day o
 
 ← [Phase 1 — completed](../phase-1/README.md) · [Roadmap](../README.md#roadmap--three-phases) · Next: [Phase 3](../phase-3/README.md)
 
+**Perfboard build guide (live page):** https://thotapremkumar-tpk.github.io/ArogyaAegis-SIH/phase-2/perfboard/
+— pin map, power chain, board layout, wire checklist, breadboard tests, soldering steps and vest mounting.
+Source: [`perfboard/index.html`](perfboard/index.html) (the served copy is `docs/phase-2/perfboard/index.html`).
+
 Scope: five body sensors in, one on-chip brain, four ways out (OLED, vibration, dashboards,
 logs), plus the Phase 2 items listed in the Phase 1 limits.
 
