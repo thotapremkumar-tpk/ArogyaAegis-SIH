@@ -24,6 +24,8 @@ Phase 3  + skin/air temp · PM2.5 · GPS · SMS SOS · buttons · buzzer · heat
 
 **Live page:** https://thotapremkumar-tpk.github.io/ArogyaAegis-SIH/
 
+**Phase 2 Information:** https://thotapremkumar-tpk.github.io/ArogyaAegis-SIH/phase-2/perfboard/
+
 Hover over (or tap) any component to see its inputs, outputs and role in the vest. The pin
 map shows which phase wires each pin.
 
@@ -36,7 +38,7 @@ map shows which phase wires each pin.
 | [`phase-3/`](phase-3/) | Plan for the remaining ArogyaAegis features(completed by end of the december) |
 | [`docs/index.html`](docs/index.html) | Interactive wiring diagram (served by GitHub Pages) |
 | [`docs/app/`](docs/app/) | Bluetooth dashboard, live at https://thotapremkumar-tpk.github.io/ArogyaAegis-SIH/app/ |
-| [`phase-2/perfboard/`](phase-2/perfboard/) | Phase 2 + 3 perfboard build guide, live at https://thotapremkumar-tpk.github.io/ArogyaAegis-SIH/phase-2/perfboard/ |
+| [`phase-2/perfboard/`](phase-2/perfboard/) | Phase 2  perfboard build guide, live at https://thotapremkumar-tpk.github.io/ArogyaAegis-SIH/phase-2/perfboard/ |
 | [`assets/ArogyaAegis_SIH26181.pdf`](assets/ArogyaAegis_SIH26181.pdf) | SIH idea presentation (PDF) |
 | [`assets/ArogyaAegis_SIH26181.pptx`](assets/ArogyaAegis_SIH26181.pptx) | SIH idea presentation (editable) |
 | [`assets/Arogya_Aegis_Architecture.png`](assets/Arogya_Aegis_Architecture.png) | System architecture |
